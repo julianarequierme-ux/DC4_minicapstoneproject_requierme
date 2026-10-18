@@ -1,0 +1,843 @@
+{
+  "info": {
+    "_postman_id": "cb3f0e86-b91a-4704-a5e1-fd3f2c964c67",
+    "name": "TripEase API",
+    "description": "End-to-end API checks for local TripEase development. Set the seeded account passwords in the collection variables if they differ from the development seeder default. Run requests in order; destructive cleanup requests are last.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000/api" },
+    { "key": "adminEmail", "value": "admin@tripease.test" },
+    { "key": "adminPassword", "value": "password" },
+    { "key": "customerEmail", "value": "customer@tripease.test" },
+    { "key": "customerPassword", "value": "password" },
+    { "key": "registrationPassword", "value": "TripEasePass123!" },
+    { "key": "adminToken", "value": "" },
+    { "key": "customerToken", "value": "" },
+    { "key": "registrationToken", "value": "" },
+    { "key": "registrationEmail", "value": "" },
+    { "key": "packageId", "value": "" },
+    { "key": "bookingId", "value": "" },
+    { "key": "cancelBookingId", "value": "" },
+    { "key": "paymentId", "value": "" },
+    { "key": "bookingDate", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register customer",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('registrationEmail', 'postman.' + Date.now() + '@tripease.test');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('register returns 201', function () { pm.response.to.have.status(201); });",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set('registrationToken', response.token);",
+                  "pm.test('registered account exposes customer role', function () { pm.expect(response.user.role).to.eql('customer'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman API Customer\",\n  \"email\": \"{{registrationEmail}}\",\n  \"password\": \"{{registrationPassword}}\",\n  \"password_confirmation\": \"{{registrationPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/register"
+          }
+        },
+        {
+          "name": "Login admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('admin login returns 200', function () { pm.response.to.have.status(200); });",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set('adminToken', response.token);",
+                  "pm.test('admin role is returned', function () { pm.expect(response.user.role).to.eql('admin'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Login customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('customer login returns 200', function () { pm.response.to.have.status(200); });",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set('customerToken', response.token);",
+                  "pm.test('customer role is returned', function () { pm.expect(response.user.role).to.eql('customer'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{customerPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Get authenticated user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('user endpoint returns 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('user response includes role', function () { pm.expect(pm.response.json().user.role).to.eql('customer'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{customerToken}}", "type": "string" }]
+            },
+            "url": "{{baseUrl}}/user"
+          }
+        },
+        {
+          "name": "Reject unauthenticated user request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('missing bearer token returns 401', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": { "type": "noauth" },
+            "url": "{{baseUrl}}/user"
+          }
+        },
+        {
+          "name": "Logout registered customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('logout returns 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{registrationToken}}", "type": "string" }]
+            },
+            "url": "{{baseUrl}}/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - package setup",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "List packages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('package list returns 200 and paginated data', function () { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.have.property('data'); pm.expect(pm.response.json()).to.have.property('meta'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/packages?per_page=5"
+          }
+        },
+        {
+          "name": "Create package",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('package create returns 201', function () { pm.response.to.have.status(201); });",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set('packageId', response.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman Philippine Island Escape\",\n  \"destination\": \"Postman QA Island\",\n  \"description\": \"A local API collection test package.\",\n  \"price\": \"1200.00\",\n  \"duration_days\": 3,\n  \"availability\": 20,\n  \"status\": \"active\"\n}"
+            },
+            "url": "{{baseUrl}}/packages"
+          }
+        },
+        {
+          "name": "Update package",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('package update returns 200 and persists price', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.price).to.eql('1500.00'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"price\": \"1500.00\"\n}" },
+            "url": "{{baseUrl}}/packages/{{packageId}}"
+          }
+        },
+        {
+          "name": "Search and filter packages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('search and filters return the created package', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.some(function (item) { return item.id === Number(pm.collectionVariables.get('packageId')); })).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/packages?search=Postman%20Philippine&destination=Postman%20QA%20Island&status=active&min_price=1000&max_price=2000&duration_days=3&per_page=5"
+          }
+        },
+        {
+          "name": "Show package",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('package show returns 200', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.id).to.eql(Number(pm.collectionVariables.get('packageId'))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/packages/{{packageId}}"
+          }
+        },
+        {
+          "name": "Customer cannot create package",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('customer package write returns 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{customerToken}}", "type": "string" }]
+            },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Unauthorized package\",\n  \"destination\": \"Nowhere\",\n  \"description\": \"Must be rejected.\",\n  \"price\": \"100.00\",\n  \"duration_days\": 1,\n  \"availability\": 1\n}"
+            },
+            "url": "{{baseUrl}}/packages"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer - bookings",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{customerToken}}", "type": "string" }]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('bookingDate', new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10));"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "Reject invalid booking input",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('invalid booking returns 422', function () { pm.response.to.have.status(422); pm.expect(pm.response.json().errors).to.have.property('number_of_guests'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"travel_package_id\": {{packageId}},\n  \"booking_date\": \"{{bookingDate}}\",\n  \"number_of_guests\": 0\n}"
+            },
+            "url": "{{baseUrl}}/bookings"
+          }
+        },
+        {
+          "name": "Create booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('booking create returns 201 with server calculated total', function () { pm.response.to.have.status(201); pm.expect(pm.response.json().data.total_amount).to.eql('3000.00'); pm.expect(pm.response.json().data.status).to.eql('Pending'); });",
+                  "pm.collectionVariables.set('bookingId', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"travel_package_id\": {{packageId}},\n  \"booking_date\": \"{{bookingDate}}\",\n  \"number_of_guests\": 2,\n  \"total_amount\": \"0.01\",\n  \"status\": \"Confirmed\"\n}"
+            },
+            "url": "{{baseUrl}}/bookings"
+          }
+        },
+        {
+          "name": "List filtered bookings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('booking filters and pagination return the owned booking', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().meta.per_page).to.eql(5); pm.expect(pm.response.json().data.some(function (item) { return item.id === Number(pm.collectionVariables.get('bookingId')); })).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/bookings?status=Pending&date_from={{bookingDate}}&date_to={{bookingDate}}&per_page=5"
+          }
+        },
+        {
+          "name": "Show booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('booking show includes loaded relations', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.user.role).to.eql('customer'); pm.expect(pm.response.json().data.travel_package.id).to.eql(Number(pm.collectionVariables.get('packageId'))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/bookings/{{bookingId}}"
+          }
+        },
+        {
+          "name": "Update booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('booking update recalculates total', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.number_of_guests).to.eql(3); pm.expect(pm.response.json().data.total_amount).to.eql('4500.00'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"number_of_guests\": 3\n}" },
+            "url": "{{baseUrl}}/bookings/{{bookingId}}"
+          }
+        },
+        {
+          "name": "Customer cannot confirm booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('customer confirmation returns 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Confirmed\"\n}" },
+            "url": "{{baseUrl}}/bookings/{{bookingId}}/status"
+          }
+        },
+        {
+          "name": "Create booking to cancel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('second booking returns 201', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('cancelBookingId', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"travel_package_id\": {{packageId}},\n  \"booking_date\": \"{{bookingDate}}\",\n  \"number_of_guests\": 1\n}"
+            },
+            "url": "{{baseUrl}}/bookings"
+          }
+        },
+        {
+          "name": "Cancel own pending booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('owner cancellation returns Cancelled', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.status).to.eql('Cancelled'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Cancelled\"\n}" },
+            "url": "{{baseUrl}}/bookings/{{cancelBookingId}}/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - payments and booking workflow",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "List all bookings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('admin sees bookings with related customer', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.some(function (item) { return item.id === Number(pm.collectionVariables.get('bookingId')); })).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/bookings?per_page=100"
+          }
+        },
+        {
+          "name": "Create payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('payment create returns 201 with booking relation', function () { pm.response.to.have.status(201); pm.expect(pm.response.json().data.booking.id).to.eql(Number(pm.collectionVariables.get('bookingId'))); });",
+                  "pm.collectionVariables.set('paymentId', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": {{bookingId}},\n  \"amount\": \"4500.00\",\n  \"payment_method\": \"Card\",\n  \"payment_status\": \"Paid\",\n  \"paid_at\": \"2026-12-15 10:30:00\"\n}"
+            },
+            "url": "{{baseUrl}}/payments"
+          }
+        },
+        {
+          "name": "Reject duplicate payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('one payment per booking is enforced', function () { pm.response.to.have.status(422); pm.expect(pm.response.json().errors).to.have.property('booking_id'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": {{bookingId}},\n  \"amount\": \"4500.00\",\n  \"payment_method\": \"Card\"\n}"
+            },
+            "url": "{{baseUrl}}/payments"
+          }
+        },
+        {
+          "name": "List payments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('admin payment list returns paginated data', function () { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.have.property('meta'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payments"
+          }
+        },
+        {
+          "name": "Show payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('payment show returns the selected payment', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.id).to.eql(Number(pm.collectionVariables.get('paymentId'))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payments/{{paymentId}}"
+          }
+        },
+        {
+          "name": "Customer can view own payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('customer sees their own payment', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.booking.id).to.eql(Number(pm.collectionVariables.get('bookingId'))); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{customerToken}}", "type": "string" }]
+            },
+            "url": "{{baseUrl}}/payments/{{paymentId}}"
+          }
+        },
+        {
+          "name": "Update payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('payment update returns 200', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.payment_status).to.eql('Refunded'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_status\": \"Refunded\"\n}"
+            },
+            "url": "{{baseUrl}}/payments/{{paymentId}}"
+          }
+        },
+        {
+          "name": "Customer cannot create payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('customer payment write returns 403', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{customerToken}}", "type": "string" }]
+            },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": {{bookingId}},\n  \"amount\": \"4500.00\",\n  \"payment_method\": \"Card\"\n}"
+            },
+            "url": "{{baseUrl}}/payments"
+          }
+        },
+        {
+          "name": "Delete payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('payment delete returns 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/payments/{{paymentId}}"
+          }
+        },
+        {
+          "name": "Recreate payment for booking cascade check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('replacement payment returns 201', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('paymentId', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": {{bookingId}},\n  \"amount\": \"4500.00\",\n  \"payment_method\": \"Card\"\n}"
+            },
+            "url": "{{baseUrl}}/payments"
+          }
+        },
+        {
+          "name": "Admin confirms booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('admin can confirm pending booking', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.status).to.eql('Confirmed'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Confirmed\"\n}" },
+            "url": "{{baseUrl}}/bookings/{{bookingId}}/status"
+          }
+        },
+        {
+          "name": "Admin completes booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('admin can complete confirmed booking', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.status).to.eql('Completed'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Completed\"\n}" },
+            "url": "{{baseUrl}}/bookings/{{bookingId}}/status"
+          }
+        },
+        {
+          "name": "Reject invalid status transition",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('completed booking cannot transition to cancelled', function () { pm.response.to.have.status(422); pm.expect(pm.response.json().errors).to.have.property('status'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Cancelled\"\n}" },
+            "url": "{{baseUrl}}/bookings/{{bookingId}}/status"
+          }
+        },
+        {
+          "name": "Delete completed booking and cascade payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('admin booking delete returns 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/bookings/{{bookingId}}"
+          }
+        },
+        {
+          "name": "Delete cancelled booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('admin can delete cancelled booking', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/bookings/{{cancelBookingId}}"
+          }
+        },
+        {
+          "name": "Delete package",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('package delete returns 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/packages/{{packageId}}"
+          }
+        }
+      ]
+    }
+  ]
+}

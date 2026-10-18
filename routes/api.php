@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\TravelPackageController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('packages', TravelPackageController::class)->only(['index', 'show']);
     Route::apiResource('payments', PaymentController::class)->only(['index', 'show']);
+    Route::apiResource('bookings', BookingController::class)->except(['destroy']);
+    Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])
+        ->name('bookings.status');
 
     Route::middleware('role:admin')->get('/admin/ping', fn () => response()->json(['message' => 'Hello Admin']));
     Route::middleware('role:customer')->get('/customer/ping', fn () => response()->json(['message' => 'Hello Customer']));
@@ -29,5 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::apiResource('packages', TravelPackageController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('payments', PaymentController::class)->only(['store', 'update', 'destroy']);
+        Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])
+            ->name('bookings.destroy');
     });
 });
