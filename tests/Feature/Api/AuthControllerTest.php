@@ -40,7 +40,8 @@ class AuthControllerTest extends TestCase
         $this->withToken($response->json('token'))
             ->getJson('/api/user')
             ->assertOk()
-            ->assertJsonPath('user.id', $user->id);
+            ->assertJsonPath('user.id', $user->id)
+            ->assertJsonPath('user.role', 'customer');
     }
 
     public function test_registration_returns_422_for_invalid_input_without_creating_a_user(): void
@@ -57,6 +58,23 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['email', 'password']);
 
         $this->assertDatabaseMissing('users', ['name' => 'TripEase Customer']);
+    }
+
+    public function test_registration_returns_422_when_the_email_is_already_registered(): void
+    {
+        User::factory()->create([
+            'email' => 'customer@example.test',
+        ]);
+
+        $this->postJson('/api/register', [
+            'name' => 'Another Customer',
+            'email' => 'customer@example.test',
+            'password' => 'correct-horse-battery',
+            'password_confirmation' => 'correct-horse-battery',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['email']);
+
+        $this->assertDatabaseMissing('users', ['name' => 'Another Customer']);
     }
 
     public function test_login_returns_401_for_invalid_credentials(): void
@@ -88,13 +106,29 @@ class AuthControllerTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('message', 'Login successful.')
             ->assertJsonPath('user.id', $user->id)
+            ->assertJsonPath('user.role', 'customer')
             ->assertJsonPath('token_type', 'Bearer')
             ->assertJsonStructure(['token']);
 
         $this->withToken($response->json('token'))
             ->getJson('/api/user')
             ->assertOk()
-            ->assertJsonPath('user.id', $user->id);
+            ->assertJsonPath('user.id', $user->id)
+            ->assertJsonPath('user.role', 'customer');
+    }
+
+    public function test_login_returns_422_when_credentials_are_missing_or_malformed(): void
+    {
+        $this->postJson('/api/login', [
+            'email' => 'not-an-email',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['email', 'password']);
+    }
+
+    public function test_logout_and_user_endpoints_return_401_without_a_bearer_token(): void
+    {
+        $this->postJson('/api/logout')->assertUnauthorized();
+        $this->getJson('/api/user')->assertUnauthorized();
     }
 
     public function test_logout_revokes_only_the_current_sanctum_token(): void
