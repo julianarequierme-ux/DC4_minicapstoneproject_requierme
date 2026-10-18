@@ -27,6 +27,7 @@ return [
     */
 
     'env' => env('APP_ENV', 'production'),
+    'demo_seed_password' => env('TRIPEASE_DEMO_SEED_PASSWORD'),
 
     /*
     |--------------------------------------------------------------------------

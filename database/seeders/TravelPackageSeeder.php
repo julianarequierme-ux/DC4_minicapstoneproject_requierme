@@ -1,0 +1,241 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\TravelPackage;
+use Illuminate\Database\Seeder;
+
+class TravelPackageSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $packages = [
+            [
+                'title' => 'Boracay White Beach Escape',
+                'destination' => 'Boracay, Aklan',
+                'description' => 'Enjoy island-hopping, clear waters, and sunset along White Beach.',
+                'price' => 12500.00,
+                'duration_days' => 3,
+                'availability' => 24,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'El Nido Lagoons and Islands',
+                'destination' => 'El Nido, Palawan',
+                'description' => 'Explore limestone lagoons and the islands of Bacuit Bay.',
+                'price' => 18900.00,
+                'duration_days' => 4,
+                'availability' => 18,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Coron Lakes and Reefs',
+                'destination' => 'Coron, Palawan',
+                'description' => 'Visit Kayangan Lake, Twin Lagoon, and nearby coral gardens.',
+                'price' => 17200.00,
+                'duration_days' => 4,
+                'availability' => 16,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Cebu Kawasan Falls Adventure',
+                'destination' => 'Badian, Cebu',
+                'description' => 'Experience a guided canyoneering trip to Kawasan Falls.',
+                'price' => 8900.00,
+                'duration_days' => 3,
+                'availability' => 20,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Siargao Surf and Island Hopping',
+                'destination' => 'General Luna, Siargao',
+                'description' => 'Combine beginner-friendly surf time with a day on nearby islands.',
+                'price' => 15800.00,
+                'duration_days' => 4,
+                'availability' => 14,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Bohol Chocolate Hills and Panglao',
+                'destination' => 'Bohol',
+                'description' => 'See the Chocolate Hills, visit local wildlife, and unwind in Panglao.',
+                'price' => 11200.00,
+                'duration_days' => 3,
+                'availability' => 22,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Baguio Highlands Weekend',
+                'destination' => 'Baguio, Benguet',
+                'description' => 'Discover Baguio gardens, markets, and cool mountain scenery.',
+                'price' => 6800.00,
+                'duration_days' => 3,
+                'availability' => 30,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Vigan Heritage and Ilocos Sur',
+                'destination' => 'Vigan, Ilocos Sur',
+                'description' => 'Walk Calle Crisologo and explore historic Ilocos Sur landmarks.',
+                'price' => 7400.00,
+                'duration_days' => 3,
+                'availability' => 20,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Batanes Island Discovery',
+                'destination' => 'Basco, Batanes',
+                'description' => 'Take in stone houses, rolling hills, and coastal viewpoints.',
+                'price' => 28900.00,
+                'duration_days' => 5,
+                'availability' => 8,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Puerto Princesa Underground River',
+                'destination' => 'Puerto Princesa, Palawan',
+                'description' => 'Visit the UNESCO-listed underground river and nearby beaches.',
+                'price' => 9800.00,
+                'duration_days' => 3,
+                'availability' => 18,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Banaue Rice Terraces and Batad',
+                'destination' => 'Banaue, Ifugao',
+                'description' => 'Trek to the mountain villages and terraces of Banaue and Batad.',
+                'price' => 10600.00,
+                'duration_days' => 4,
+                'availability' => 12,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Camiguin Island and Sunken Cemetery',
+                'destination' => 'Camiguin',
+                'description' => 'Tour waterfalls, hot springs, and Camiguin coastal landmarks.',
+                'price' => 9300.00,
+                'duration_days' => 3,
+                'availability' => 16,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Davao and Samal Island',
+                'destination' => 'Davao City and Samal',
+                'description' => 'Pair Davao city sights with a relaxing Samal Island day trip.',
+                'price' => 8700.00,
+                'duration_days' => 3,
+                'availability' => 24,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Intramuros and Manila Bay',
+                'destination' => 'Manila',
+                'description' => 'Explore Intramuros heritage sites and Manila Bay attractions.',
+                'price' => 4200.00,
+                'duration_days' => 2,
+                'availability' => 30,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Iloilo Heritage and Guimaras',
+                'destination' => 'Iloilo and Guimaras',
+                'description' => 'Visit Iloilo heritage churches and take a ferry to Guimaras.',
+                'price' => 8100.00,
+                'duration_days' => 3,
+                'availability' => 18,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Dumaguete and Apo Island',
+                'destination' => 'Dumaguete, Negros Oriental',
+                'description' => 'Snorkel with a guide around Apo Island and enjoy Dumaguete.',
+                'price' => 11900.00,
+                'duration_days' => 4,
+                'availability' => 14,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Sagada Caves and Mountain Views',
+                'destination' => 'Sagada, Mountain Province',
+                'description' => 'Discover Sagada viewpoints, caves, and local mountain culture.',
+                'price' => 8900.00,
+                'duration_days' => 4,
+                'availability' => 12,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Lake Sebu Culture and Waterfalls',
+                'destination' => 'Lake Sebu, South Cotabato',
+                'description' => 'See Lake Sebu waterfalls and experience Tboli cultural sites.',
+                'price' => 7600.00,
+                'duration_days' => 3,
+                'availability' => 15,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Zambales Anawangin Cove',
+                'destination' => 'San Antonio, Zambales',
+                'description' => 'Spend a weekend camping and swimming at Anawangin Cove.',
+                'price' => 5900.00,
+                'duration_days' => 3,
+                'availability' => 20,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'La Union Surf and Food Weekend',
+                'destination' => 'San Juan, La Union',
+                'description' => 'Try a surf lesson and explore the cafes of San Juan.',
+                'price' => 6200.00,
+                'duration_days' => 3,
+                'availability' => 22,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Batangas Anilao Marine Escape',
+                'destination' => 'Anilao, Batangas',
+                'description' => 'Enjoy guided snorkeling and coastal time in Anilao.',
+                'price' => 7200.00,
+                'duration_days' => 3,
+                'availability' => 16,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Ilocos Norte Paoay and Pagudpud',
+                'destination' => 'Ilocos Norte',
+                'description' => 'Visit Paoay Church, Laoag, and the coastal sights of Pagudpud.',
+                'price' => 12800.00,
+                'duration_days' => 4,
+                'availability' => 12,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Marinduque Island and Beaches',
+                'destination' => 'Marinduque',
+                'description' => 'Explore Marinduque beaches, caves, and island scenery.',
+                'price' => 9700.00,
+                'duration_days' => 4,
+                'availability' => 10,
+                'status' => 'active',
+            ],
+            [
+                'title' => 'Romblon Marble and Island Tour',
+                'destination' => 'Romblon',
+                'description' => 'Discover Romblon town, local marble craft, and nearby beaches.',
+                'price' => 14900.00,
+                'duration_days' => 5,
+                'availability' => 10,
+                'status' => 'active',
+            ],
+        ];
+
+        foreach ($packages as $package) {
+            TravelPackage::query()->updateOrCreate(
+                ['title' => $package['title']],
+                $package,
+            );
+        }
+    }
+}
