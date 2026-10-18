@@ -24,6 +24,8 @@ class TravelPackage extends Model
     {
         return [
             'price' => 'decimal:2',
+            'duration_days' => 'integer',
+            'availability' => 'integer',
         ];
     }
 

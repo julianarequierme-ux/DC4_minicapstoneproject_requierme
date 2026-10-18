@@ -24,6 +24,7 @@ class Booking extends Model
     {
         return [
             'booking_date' => 'date',
+            'number_of_guests' => 'integer',
             'total_amount' => 'decimal:2',
         ];
     }

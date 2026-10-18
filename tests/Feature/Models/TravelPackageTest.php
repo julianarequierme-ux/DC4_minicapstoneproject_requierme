@@ -21,7 +21,6 @@ class TravelPackageTest extends TestCase
             'price' => '125.5',
             'duration_days' => 4,
             'availability' => 8,
-            'status' => 'active',
         ]);
         $user = User::factory()->create();
         $booking = Booking::create([
@@ -30,10 +29,13 @@ class TravelPackageTest extends TestCase
             'booking_date' => '2026-11-01',
             'number_of_guests' => 2,
             'total_amount' => '251.00',
-            'status' => 'pending',
+            'status' => 'Pending',
         ]);
 
         $this->assertSame($booking->id, $travelPackage->bookings()->sole()->id);
         $this->assertSame('125.50', $travelPackage->fresh()->price);
+        $this->assertSame(4, $travelPackage->fresh()->duration_days);
+        $this->assertSame(8, $travelPackage->fresh()->availability);
+        $this->assertSame('active', $travelPackage->fresh()->status);
     }
 }

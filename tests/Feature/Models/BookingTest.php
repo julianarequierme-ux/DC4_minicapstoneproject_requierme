@@ -19,6 +19,7 @@ class BookingTest extends TestCase
         $travelPackage = TravelPackage::create([
             'title' => 'Coastal Escape',
             'destination' => 'Coron',
+            'description' => 'Island tour',
             'price' => '125.50',
             'duration_days' => 4,
             'availability' => 8,
@@ -29,13 +30,11 @@ class BookingTest extends TestCase
             'booking_date' => '2026-11-01',
             'number_of_guests' => 2,
             'total_amount' => '251',
-            'status' => 'pending',
         ]);
         $payment = Payment::create([
             'booking_id' => $booking->id,
             'amount' => '251',
             'payment_method' => 'card',
-            'payment_status' => 'pending',
         ]);
 
         $this->assertSame($user->id, $booking->user->id);
@@ -43,5 +42,8 @@ class BookingTest extends TestCase
         $this->assertSame($payment->id, $booking->payment->id);
         $this->assertSame('2026-11-01', $booking->fresh()->booking_date->toDateString());
         $this->assertSame('251.00', $booking->fresh()->total_amount);
+        $this->assertSame(2, $booking->fresh()->number_of_guests);
+        $this->assertSame('Pending', $booking->fresh()->status);
+        $this->assertSame('Unpaid', $payment->fresh()->payment_status);
     }
 }

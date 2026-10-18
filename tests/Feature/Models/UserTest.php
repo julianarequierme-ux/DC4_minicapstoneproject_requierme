@@ -36,6 +36,7 @@ class UserTest extends TestCase
         $travelPackage = TravelPackage::create([
             'title' => 'Coastal Escape',
             'destination' => 'Coron',
+            'description' => 'Island tour',
             'price' => '125.50',
             'duration_days' => 4,
             'availability' => 8,
@@ -46,7 +47,7 @@ class UserTest extends TestCase
             'booking_date' => '2026-11-01',
             'number_of_guests' => 2,
             'total_amount' => '251.00',
-            'status' => 'pending',
+            'status' => 'Pending',
         ]);
 
         $this->assertSame($booking->id, $user->bookings()->sole()->id);
