@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\TravelPackageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/ping', function () {
@@ -18,6 +20,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
+    Route::apiResource('packages', TravelPackageController::class)->only(['index', 'show']);
+    Route::apiResource('payments', PaymentController::class)->only(['index', 'show']);
+
     Route::middleware('role:admin')->get('/admin/ping', fn () => response()->json(['message' => 'Hello Admin']));
     Route::middleware('role:customer')->get('/customer/ping', fn () => response()->json(['message' => 'Hello Customer']));
+
+    Route::middleware('role:admin')->group(function () {
+        Route::apiResource('packages', TravelPackageController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('payments', PaymentController::class)->only(['store', 'update', 'destroy']);
+    });
 });
