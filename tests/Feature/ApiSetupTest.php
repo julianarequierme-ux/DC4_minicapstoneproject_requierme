@@ -53,7 +53,7 @@ class ApiSetupTest extends TestCase
         $this->withToken($token)
             ->getJson('/api/user')
             ->assertOk()
-            ->assertJsonPath('id', $user->id)
-            ->assertJsonPath('email', $user->email);
+            ->assertJsonPath('user.id', $user->id)
+            ->assertJsonPath('user.email', $user->email);
     }
 }
