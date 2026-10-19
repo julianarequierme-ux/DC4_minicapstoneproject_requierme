@@ -8,7 +8,7 @@ Jaycel Aplacador
 
 ## Client
 
-TripEase project stakeholders. A named external client is not identified in the repository.
+A small Philippine travel agency is the intended client. The repository does not identify the agency by name.
 
 ## Problem statement
 
@@ -33,7 +33,7 @@ Travelers need a straightforward way to find trips, submit bookings, and follow 
 - Searchable, filterable, paginated travel packages.
 - Booking creation with server-calculated totals and package availability updates.
 - Customer-scoped booking lists, details, updates, and cancellation.
-- Admin booking status workflow: Pending -> Confirmed -> Completed, or Pending -> Cancelled.
+- Admin booking status workflow: Pending -> Approved -> Completed, or Pending -> Cancelled.
 - One payment per booking; payment method/status management.
 - Database-backed admin dashboard counts.
 - Responsive React UI with loading and validation feedback.
@@ -45,9 +45,13 @@ Travelers need a straightforward way to find trips, submit bookings, and follow 
 - **Frontend:** React 19.3, React Router 7, Axios 1.20, Vite 8.3.
 - **Tooling and tests:** Composer, npm, PHPUnit 12, Oxlint.
 
+**Assignment compatibility note:** the supplied setup prompt specifies Laravel 11 or 12. This repository remains on Laravel 13 as approved; PHP 8.3 satisfies the prompt's PHP 8.2+ minimum. Confirm with the instructor that Laravel 13 is acceptable.
+
 ## Architecture
 
 The React single-page application in `frontend_TripEase_react/` sends JSON requests through Axios to the Laravel API under `/api`. Laravel routes apply Sanctum authentication and, for administrator operations, the `role:admin` middleware. Form Requests validate input, controllers coordinate database operations, and API Resources format package, booking, and payment responses. MySQL stores application records. The frontend API base URL defaults to `http://localhost:8000/api` and can be overridden with `VITE_API_URL`.
+
+The Laravel backend is at the repository root and the React app is in `frontend_TripEase_react/`; this differs from the example `backend/` and `frontend/` directory names in the original scaffold prompt.
 
 ## Database relationships
 
@@ -58,6 +62,8 @@ The React single-page application in `frontend_TripEase_react/` sends JSON reque
 - Sanctum `personal_access_tokens` has a polymorphic `tokenable` reference. The session table's nullable `user_id` is indexed but is not declared as a foreign key.
 
 See [docs/ERD.mmd](docs/ERD.mmd) for the entity diagram, including Laravel support tables.
+
+The planning proposal and low-fidelity page sketches are in [docs/CP1_PROPOSAL.md](docs/CP1_PROPOSAL.md) and [docs/WIREFRAMES.md](docs/WIREFRAMES.md).
 
 ## Installation
 
@@ -201,9 +207,9 @@ All routes below are prefixed with `/api`. Protected routes require `Authorizati
 | `DELETE` | `/api/bookings/{booking}` | Sanctum + Admin | Delete a booking. |
 | `PATCH` | `/api/bookings/{booking}/cancel` | Sanctum; owning customer | Cancel an eligible pending booking. |
 | `PATCH` | `/api/bookings/{booking}/status` | Sanctum + Admin | Change booking status according to the workflow. |
-| `GET` | `/api/dashboard` | Sanctum + Admin | Return live package, booking-status, and customer counts. |
+| `GET` | `/api/dashboard` | Sanctum; admin or customer | Return live booking counts scoped to the customer; admins also receive package and customer totals. |
 | `GET` | `/api/payments` | Sanctum + Admin | List payments. |
-| `POST` | `/api/payments` | Sanctum + Admin | Record a payment for a confirmed booking. |
+| `POST` | `/api/payments` | Sanctum + Admin | Record a payment for an approved booking. |
 | `GET` | `/api/payments/{payment}` | Sanctum + Admin | Show a payment. |
 | `PUT`, `PATCH` | `/api/payments/{payment}` | Sanctum + Admin | Update a payment. |
 | `DELETE` | `/api/payments/{payment}` | Sanctum + Admin | Delete a payment. |
@@ -229,6 +235,14 @@ npm run build
 ```
 
 Manual API smoke tests can be run by importing `docs/postman_collection.json` into Postman, setting the collection base URL, and running requests with the appropriate seeded Admin or Customer token.
+
+## Presentation and handover
+
+- [CP1 proposal](docs/CP1_PROPOSAL.md) and [wireframes](docs/WIREFRAMES.md)
+- [Testing report](docs/TESTING.md) and [CP3 checklist](docs/CP3_CHECKLIST.md)
+- [Eight-slide presentation PDF](docs/presentation.pdf) and [Day 14 script](docs/DAY14_PRESENTATION_SCRIPT.md)
+- [Screenshots folder](docs/screenshots/) is ready for genuine desktop/mobile captures; those screenshots have not been added yet.
+- **Demo video:** not recorded yet. Add the published 5-8 minute video URL here when available.
 
 ## References
 

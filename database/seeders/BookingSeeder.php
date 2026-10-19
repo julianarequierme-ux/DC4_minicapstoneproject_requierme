@@ -21,7 +21,7 @@ class BookingSeeder extends Seeder
                 'package' => 'Boracay White Beach Escape',
                 'booking_date' => '2026-11-12',
                 'number_of_guests' => 2,
-                'status' => 'Confirmed',
+                'status' => 'Approved',
                 'payment_status' => 'Paid',
                 'payment_method' => 'GCash',
                 'paid_at' => '2026-10-18 09:00:00',

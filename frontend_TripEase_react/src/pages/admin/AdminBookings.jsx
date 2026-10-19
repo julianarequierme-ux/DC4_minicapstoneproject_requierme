@@ -13,10 +13,10 @@ import { showToast } from '../../services/toasts';
 
 const ACTIONS = {
   Pending: [
-    { to: 'Confirmed', label: 'Confirm', variant: 'primary' },
+    { to: 'Approved', label: 'Approve', variant: 'primary' },
     { to: 'Cancelled', label: 'Reject', variant: 'danger' },
   ],
-  Confirmed: [{ to: 'Completed', label: 'Mark completed', variant: 'primary' }],
+  Approved: [{ to: 'Completed', label: 'Mark completed', variant: 'primary' }],
 };
 
 export default function AdminBookings() {
@@ -107,9 +107,7 @@ export default function AdminBookings() {
         <select value={list.status} onChange={(event) => list.setStatus(event.target.value)}>
           <option value="">All statuses</option>
           {BOOKING_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {status === 'Confirmed' ? 'Approved' : status}
-            </option>
+            <option key={status} value={status}>{status}</option>
           ))}
         </select>
       </div>

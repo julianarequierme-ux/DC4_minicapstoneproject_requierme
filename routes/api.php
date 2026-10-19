@@ -26,12 +26,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('bookings', BookingController::class)->except(['destroy']);
     Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])
         ->name('bookings.cancel');
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
     Route::middleware('role:admin')->get('/admin/ping', fn () => response()->json(['message' => 'Hello Admin']));
     Route::middleware('role:customer')->get('/customer/ping', fn () => response()->json(['message' => 'Hello Customer']));
 
     Route::middleware('role:admin')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index']);
         Route::apiResource('packages', TravelPackageController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('payments', PaymentController::class);
         Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])

@@ -25,7 +25,7 @@
 - Searchable, filterable, paginated travel packages.
 - Booking creation with server-calculated totals and availability handling.
 - Customer-scoped bookings and cancellation of eligible pending bookings.
-- Admin booking workflow: Pending -> Confirmed -> Completed, or Pending -> Cancelled.
+- Admin booking workflow: Pending -> Approved -> Completed, or Pending -> Cancelled.
 - Payment management and database-backed dashboard counts.
 - Responsive React interface with form and request feedback.
 
@@ -42,7 +42,7 @@
 1. Sign in as a customer and search/filter the package list.
 2. Open a package and create a booking; show its Pending status and customer booking list.
 3. Sign in as an admin and review the new booking and dashboard totals.
-4. Confirm the booking, then show the customer-visible status.
+4. Approve the booking, then show the customer-visible status.
 5. Complete the booking and show the terminal status.
 6. Demonstrate the alternative Pending -> Cancelled path, if time permits.
 

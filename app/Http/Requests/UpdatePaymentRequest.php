@@ -28,7 +28,7 @@ class UpdatePaymentRequest extends FormRequest
                 'sometimes',
                 'required',
                 'integer',
-                Rule::exists('bookings', 'id')->where('status', 'Confirmed'),
+                Rule::exists('bookings', 'id')->where('status', 'Approved'),
                 Rule::unique('payments', 'booking_id')->ignore($this->route('payment')),
             ],
             'amount' => ['sometimes', 'required', 'numeric', 'decimal:0,2', 'gt:0', 'max:99999999.99'],

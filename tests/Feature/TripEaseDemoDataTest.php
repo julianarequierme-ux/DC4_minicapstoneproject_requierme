@@ -35,7 +35,7 @@ class TripEaseDemoDataTest extends TestCase
         $this->assertSame(4, Payment::query()->count());
         $this->assertSame(5, User::query()->where('role', 'customer')->count());
         $this->assertSame(
-            ['Completed', 'Confirmed', 'Pending', 'Cancelled'],
+            ['Completed', 'Approved', 'Pending', 'Cancelled'],
             Booking::query()->orderBy('booking_date')->pluck('status')->all(),
         );
         $this->assertSame(4, Booking::query()->whereHas('payment')->count());
@@ -71,6 +71,28 @@ class TripEaseDemoDataTest extends TestCase
         $this->assertSame($travelPackage->id, $booking->travel_package_id);
         $this->assertSame($booking->id, $payment->booking_id);
         $this->assertSame('Paid', $payment->payment_status);
+    }
+
+    public function test_booking_status_migration_converts_confirmed_records_to_approved(): void
+    {
+        $booking = Booking::factory()->create(['status' => 'Confirmed']);
+        $migration = require database_path(
+            'migrations/2026_10_19_172805_update_confirmed_booking_status_to_approved.php',
+        );
+
+        $migration->up();
+
+        $this->assertDatabaseHas('bookings', [
+            'id' => $booking->id,
+            'status' => 'Approved',
+        ]);
+
+        $migration->down();
+
+        $this->assertDatabaseHas('bookings', [
+            'id' => $booking->id,
+            'status' => 'Confirmed',
+        ]);
     }
 
     public function test_production_seeding_requires_a_configured_demo_password(): void

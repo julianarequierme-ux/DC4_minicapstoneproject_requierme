@@ -27,7 +27,7 @@ class BookingFactory extends Factory
             'total_amount' => fake()->randomFloat(2, 2500, 150000),
             'status' => fake()->randomElement([
                 'Pending',
-                'Confirmed',
+                'Approved',
                 'Completed',
                 'Cancelled',
             ]),

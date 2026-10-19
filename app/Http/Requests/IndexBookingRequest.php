@@ -23,7 +23,7 @@ class IndexBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['sometimes', 'string', 'in:Pending,Confirmed,Completed,Cancelled'],
+            'status' => ['sometimes', 'string', 'in:Pending,Approved,Completed,Cancelled'],
             'search' => ['sometimes', 'string', 'max:255'],
             'date_from' => ['sometimes', 'date'],
             'date_to' => ['sometimes', 'date', 'after_or_equal:date_from'],

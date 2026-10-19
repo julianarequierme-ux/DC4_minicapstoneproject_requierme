@@ -1,7 +1,7 @@
 import api from './api';
 import { normalizePage } from './packageService';
 
-export const BOOKING_STATUSES = ['Pending', 'Confirmed', 'Completed', 'Cancelled'];
+export const BOOKING_STATUSES = ['Pending', 'Approved', 'Completed', 'Cancelled'];
 
 const unwrap = (response) => response.data?.data ?? response.data;
 

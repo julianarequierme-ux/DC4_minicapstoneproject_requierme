@@ -27,8 +27,8 @@ Tested on: 19 / 10 / 2026     Tester: Automated repository checks; browser/MySQL
 | 16 | Dashboard access | /admin/dashboard opens | NOT RUN |
 | 17 | Package CRUD | Create, edit, delete all persist in MySQL | PASS (API feature test database; live MySQL/UI not checked) |
 | 18 | View all bookings | All customers' bookings visible | PASS (API feature test) |
-| 19 | Change booking status | Pending→Confirmed→Completed; Pending→Cancelled; invalid move rejected | PASS (API feature test) |
-| 20 | Payment management | Record and update a payment for a Confirmed booking | NOT RUN (payment API tests pass; browser-to-MySQL flow not checked) |
+| 19 | Change booking status | Pending→Approved→Completed; Pending→Cancelled; invalid move rejected | PASS (API feature test) |
+| 20 | Payment management | Record and update a payment for an Approved booking | NOT RUN (payment API tests pass; browser-to-MySQL flow not checked) |
 | **SECURITY** |
 | 21 | Customer blocked from admin pages | Customer opening /admin/* is redirected | NOT RUN (browser navigation not checked) |
 | 22 | Customer blocked from admin API | Customer token → admin endpoints returns 403 (Postman + `Cp3SecurityTest`) | PASS (`Cp3SecurityTest` and payment API tests) |

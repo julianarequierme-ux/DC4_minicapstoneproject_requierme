@@ -123,12 +123,12 @@ class PaymentControllerTest extends TestCase
         $this->assertSame(1, Payment::query()->where('booking_id', $booking->id)->count());
     }
 
-    public function test_admin_can_only_record_payments_for_confirmed_bookings_and_supported_values(): void
+    public function test_admin_can_only_record_payments_for_approved_bookings_and_supported_values(): void
     {
         $admin = User::factory()->create();
         $admin->forceFill(['role' => 'admin'])->save();
         $pendingBooking = $this->createBookingFor(User::factory()->create(), 'Pending');
-        $confirmedBooking = $this->createBookingFor(User::factory()->create(), 'Confirmed');
+        $approvedBooking = $this->createBookingFor(User::factory()->create(), 'Approved');
         $this->authenticateAs($admin);
 
         $this->postJson('/api/payments', [
@@ -139,7 +139,7 @@ class PaymentControllerTest extends TestCase
             ->assertJsonValidationErrors(['booking_id']);
 
         $this->postJson('/api/payments', [
-            'booking_id' => $confirmedBooking->id,
+            'booking_id' => $approvedBooking->id,
             'amount' => 0,
             'payment_method' => 'Crypto',
             'payment_status' => 'Pending',
@@ -147,7 +147,7 @@ class PaymentControllerTest extends TestCase
             ->assertJsonValidationErrors(['amount', 'payment_method', 'payment_status']);
     }
 
-    private function createBookingFor(User $user, string $status = 'Confirmed'): Booking
+    private function createBookingFor(User $user, string $status = 'Approved'): Booking
     {
         $travelPackage = TravelPackage::factory()->create();
 

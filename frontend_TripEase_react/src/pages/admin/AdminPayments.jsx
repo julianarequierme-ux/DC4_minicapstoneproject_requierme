@@ -82,7 +82,7 @@ export default function AdminPayments() {
     setModalOpen(true);
 
     try {
-      const result = await fetchBookings({ status: 'Confirmed', per_page: 50 });
+      const result = await fetchBookings({ status: 'Approved', per_page: 50 });
       setBookings(result.items.filter((booking) => !booking.payment));
     } catch (requestError) {
       setFormMessage(parseApiError(requestError).message);
@@ -124,7 +124,7 @@ export default function AdminPayments() {
 
     const validationErrors = {};
     if (!editing && !form.booking_id) {
-      validationErrors.booking_id = 'Choose a confirmed booking.';
+      validationErrors.booking_id = 'Choose an approved booking.';
     }
     if (!form.amount || !Number.isFinite(Number(form.amount)) || Number(form.amount) <= 0) {
       validationErrors.amount = 'Amount must be greater than 0.';
@@ -232,7 +232,7 @@ export default function AdminPayments() {
         <form onSubmit={handleSave} noValidate>
           {!editing && (
             <div className="form-group">
-              <label htmlFor="booking_id">Confirmed booking</label>
+              <label htmlFor="booking_id">Approved booking</label>
               <select
                 id="booking_id"
                 name="booking_id"
@@ -255,7 +255,7 @@ export default function AdminPayments() {
                 <small className="error-text">{firstError(errors.booking_id)}</small>
               )}
               {!bookingsLoading && bookings.length === 0 && !formMessage && (
-                <small className="muted">No confirmed unpaid bookings are available.</small>
+                <small className="muted">No approved unpaid bookings are available.</small>
               )}
             </div>
           )}

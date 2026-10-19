@@ -27,7 +27,7 @@ class StorePaymentRequest extends FormRequest
             'booking_id' => [
                 'required',
                 'integer',
-                Rule::exists('bookings', 'id')->where('status', 'Confirmed'),
+                Rule::exists('bookings', 'id')->where('status', 'Approved'),
                 'unique:payments,booking_id',
             ],
             'amount' => ['required', 'numeric', 'decimal:0,2', 'gt:0', 'max:99999999.99'],

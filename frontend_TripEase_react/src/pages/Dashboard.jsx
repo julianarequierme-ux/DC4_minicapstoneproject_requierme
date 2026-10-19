@@ -21,7 +21,7 @@ export default function Dashboard() {
         <div className="stat-grid">
           <StatCard icon="🧳" label="My bookings" value={stats.total_bookings} />
           <StatCard icon="⏳" label="Pending" value={stats.pending_bookings} tone="amber" />
-          <StatCard icon="✅" label="Confirmed" value={stats.confirmed_bookings} tone="green" />
+          <StatCard icon="✅" label="Approved" value={stats.approved_bookings} tone="green" />
           <StatCard icon="🏁" label="Completed" value={stats.completed_bookings} tone="teal" />
         </div>
       )}

@@ -212,13 +212,13 @@ class BookingController extends Controller
                 ->findOrFail($booking->getKey());
 
             $isValidTransition = match ($nextStatus) {
-                'Confirmed' => $user->isAdmin() && $booking->status === 'Pending',
-                'Completed' => $user->isAdmin() && $booking->status === 'Confirmed',
+                'Approved' => $user->isAdmin() && $booking->status === 'Pending',
+                'Completed' => $user->isAdmin() && $booking->status === 'Approved',
                 'Cancelled' => $booking->status === 'Pending',
                 default => false,
             };
 
-            if (in_array($nextStatus, ['Confirmed', 'Completed'], true) && ! $user->isAdmin()) {
+            if (in_array($nextStatus, ['Approved', 'Completed'], true) && ! $user->isAdmin()) {
                 abort(403);
             }
 
@@ -251,7 +251,7 @@ class BookingController extends Controller
         DB::transaction(function () use ($booking): void {
             $booking = Booking::query()->lockForUpdate()->findOrFail($booking->getKey());
 
-            if (in_array($booking->status, ['Pending', 'Confirmed'], true)) {
+            if (in_array($booking->status, ['Pending', 'Approved'], true)) {
                 $travelPackage = TravelPackage::query()
                     ->whereKey($booking->travel_package_id)
                     ->lockForUpdate()

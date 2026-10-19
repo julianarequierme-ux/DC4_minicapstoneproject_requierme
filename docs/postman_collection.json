@@ -706,7 +706,7 @@
           }
         },
         {
-          "name": "Customer cannot confirm booking",
+          "name": "Customer cannot approve booking",
           "event": [
             {
               "listen": "test",
@@ -728,7 +728,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"Confirmed\"\n}"
+              "raw": "{\n  \"status\": \"Approved\"\n}"
             },
             "url": "{{base_url}}/bookings/{{bookingId}}/status"
           }
@@ -814,14 +814,14 @@
           }
         },
         {
-          "name": "Admin confirms booking",
+          "name": "Admin approves booking",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('admin can confirm pending booking', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.status).to.eql('Confirmed'); });"
+                  "pm.test('admin can approve pending booking', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.status).to.eql('Approved'); });"
                 ]
               }
             }
@@ -836,7 +836,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"Confirmed\"\n}"
+              "raw": "{\n  \"status\": \"Approved\"\n}"
             },
             "url": "{{base_url}}/bookings/{{bookingId}}/status"
           }
@@ -1129,7 +1129,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('admin can complete confirmed booking', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.status).to.eql('Completed'); });"
+                  "pm.test('admin can complete approved booking', function () { pm.response.to.have.status(200); pm.expect(pm.response.json().data.status).to.eql('Completed'); });"
                 ]
               }
             }

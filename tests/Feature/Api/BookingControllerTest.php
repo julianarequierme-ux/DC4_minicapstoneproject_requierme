@@ -28,7 +28,7 @@ class BookingControllerTest extends TestCase
             'booking_date' => '2026-12-10',
             'number_of_guests' => 3,
             'total_amount' => '0.01',
-            'status' => 'Confirmed',
+            'status' => 'Approved',
             'user_id' => User::factory()->create()->id,
         ]);
 
@@ -41,7 +41,7 @@ class BookingControllerTest extends TestCase
             'number_of_guests' => 3,
             'special_request' => 'Window seat, if available.',
             'total_amount' => '0.01',
-            'status' => 'Confirmed',
+            'status' => 'Approved',
         ])->assertCreated()
             ->assertJsonPath('data.user_id', $customer->id)
             ->assertJsonPath('data.travel_package_id', $package->id)
@@ -122,7 +122,7 @@ class BookingControllerTest extends TestCase
         ]);
         $otherBooking = $this->createBooking($otherCustomer, $otherPackage, [
             'booking_date' => '2026-12-10',
-            'status' => 'Confirmed',
+            'status' => 'Approved',
         ]);
         $this->authenticateAs($customer);
 
@@ -148,7 +148,17 @@ class BookingControllerTest extends TestCase
         $this->getJson('/api/bookings?search=Other%20Customer')
             ->assertOk()
             ->assertJsonCount(0, 'data');
+
+        $approvedBooking = $this->createBooking($customer, $package, [
+            'booking_date' => '2026-11-20',
+            'status' => 'Approved',
+        ]);
         $this->getJson('/api/bookings?status=Approved')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $approvedBooking->id);
+
+        $this->getJson('/api/bookings?status=Declined')
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['status']);
     }
@@ -177,7 +187,7 @@ class BookingControllerTest extends TestCase
             'number_of_guests' => 3,
             'special_request' => 'Vegetarian meal.',
             'total_amount' => '1.00',
-            'status' => 'Confirmed',
+            'status' => 'Approved',
         ])->assertOk()
             ->assertJsonPath('data.travel_package_id', $newPackage->id)
             ->assertJsonPath('data.number_of_guests', 3)
@@ -249,7 +259,7 @@ class BookingControllerTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_confirm_then_complete_a_booking_but_invalid_transitions_return_422(): void
+    public function test_admin_can_approve_then_complete_a_booking_but_invalid_transitions_return_422(): void
     {
         $admin = User::factory()->create();
         $admin->forceFill(['role' => 'admin'])->save();
@@ -259,9 +269,9 @@ class BookingControllerTest extends TestCase
         $this->authenticateAs($admin);
 
         $this->patchJson("/api/bookings/{$booking->id}/status", [
-            'status' => 'Confirmed',
+            'status' => 'Approved',
         ])->assertOk()
-            ->assertJsonPath('data.status', 'Confirmed');
+            ->assertJsonPath('data.status', 'Approved');
 
         $this->patchJson("/api/bookings/{$booking->id}/status", [
             'status' => 'Completed',
@@ -274,7 +284,7 @@ class BookingControllerTest extends TestCase
             ->assertJsonValidationErrors(['status']);
 
         $this->patchJson("/api/bookings/{$booking->id}/status", [
-            'status' => 'Approved',
+            'status' => 'Declined',
         ])->assertUnprocessable()
             ->assertJsonValidationErrors(['status']);
     }
@@ -289,7 +299,7 @@ class BookingControllerTest extends TestCase
         $this->authenticateAs($customer);
 
         $this->patchJson("/api/bookings/{$ownedBooking->id}/status", [
-            'status' => 'Confirmed',
+            'status' => 'Approved',
         ])->assertForbidden();
 
         $this->patchJson("/api/bookings/{$otherBooking->id}/cancel")
@@ -357,7 +367,7 @@ class BookingControllerTest extends TestCase
     {
         $customer = User::factory()->create();
         $package = TravelPackage::factory()->create();
-        $booking = $this->createBooking($customer, $package, ['status' => 'Confirmed']);
+        $booking = $this->createBooking($customer, $package, ['status' => 'Approved']);
         $this->authenticateAs($customer);
 
         $this->deleteJson("/api/bookings/{$booking->id}")->assertForbidden();

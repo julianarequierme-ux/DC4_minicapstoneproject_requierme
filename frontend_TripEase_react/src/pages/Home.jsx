@@ -43,7 +43,7 @@ export default function Home() {
           <article className="card">
             <h3>✅ Track everything</h3>
             <p className="muted">
-              Follow each booking from Pending to Confirmed to Completed.
+              Follow each booking from Pending to Approved to Completed.
             </p>
           </article>
         </div>

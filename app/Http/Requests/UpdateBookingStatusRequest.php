@@ -24,7 +24,7 @@ class UpdateBookingStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'string', Rule::in(['Confirmed', 'Completed', 'Cancelled'])],
+            'status' => ['required', 'string', Rule::in(['Approved', 'Completed', 'Cancelled'])],
         ];
     }
 }
