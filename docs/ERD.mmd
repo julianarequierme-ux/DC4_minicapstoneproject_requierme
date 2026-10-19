@@ -1,0 +1,128 @@
+erDiagram
+    USERS {
+        bigint id PK
+        string name
+        string email UK
+        string password
+        string role
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    TRAVEL_PACKAGES {
+        bigint id PK
+        string title
+        string destination
+        string category "nullable"
+        text description
+        decimal price
+        int duration_days
+        int availability
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    BOOKINGS {
+        bigint id PK
+        bigint user_id FK
+        bigint travel_package_id FK
+        date booking_date
+        int number_of_guests
+        text special_request "nullable"
+        decimal total_amount
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PAYMENTS {
+        bigint id PK
+        bigint booking_id FK,UK
+        decimal amount
+        string payment_method
+        string payment_status
+        datetime paid_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PASSWORD_RESET_TOKENS {
+        string email PK
+        string token
+        timestamp created_at "nullable"
+    }
+
+    SESSIONS {
+        string id PK
+        bigint user_id "nullable, indexed; no FK constraint"
+        string ip_address "nullable"
+        text user_agent "nullable"
+        longtext payload
+        int last_activity
+    }
+
+    PERSONAL_ACCESS_TOKENS {
+        bigint id PK
+        string tokenable_type
+        bigint tokenable_id
+        text name
+        string token UK
+        text abilities "nullable"
+        timestamp last_used_at "nullable"
+        timestamp expires_at "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CACHE {
+        string key PK
+        mediumtext value
+        bigint expiration
+    }
+
+    CACHE_LOCKS {
+        string key PK
+        string owner
+        bigint expiration
+    }
+
+    JOBS {
+        bigint id PK
+        string queue
+        longtext payload
+        smallint attempts
+        int reserved_at "nullable"
+        int available_at
+        int created_at
+    }
+
+    JOB_BATCHES {
+        string id PK
+        string name
+        int total_jobs
+        int pending_jobs
+        int failed_jobs
+        longtext failed_job_ids
+        mediumtext options "nullable"
+        int cancelled_at "nullable"
+        int created_at
+        int finished_at "nullable"
+    }
+
+    FAILED_JOBS {
+        bigint id PK
+        string uuid UK
+        string connection
+        string queue
+        longtext payload
+        longtext exception
+        timestamp failed_at
+    }
+
+    USERS ||--o{ BOOKINGS : makes
+    TRAVEL_PACKAGES ||--o{ BOOKINGS : is_booked_in
+    BOOKINGS ||--o| PAYMENTS : has
+
+%% personal_access_tokens.tokenable_type/tokenable_id is polymorphic (not a direct FK).
+%% sessions.user_id is nullable and indexed; the migration does not declare a foreign key.
