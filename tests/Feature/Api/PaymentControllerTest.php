@@ -13,7 +13,7 @@ class PaymentControllerTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_customer_can_only_list_and_show_their_own_payments(): void
+    public function test_customer_cannot_list_or_show_payments(): void
     {
         $customer = User::factory()->create();
         $otherCustomer = User::factory()->create();
@@ -23,17 +23,9 @@ class PaymentControllerTest extends TestCase
         $otherPayment = Payment::factory()->for($otherBooking)->create();
         $this->authenticateAs($customer);
 
-        $this->getJson('/api/payments')
-            ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.id', $customerPayment->id)
-            ->assertJsonPath('data.0.booking.travel_package.title', $customerBooking->travelPackage->title);
-
-        $this->getJson("/api/payments/{$customerPayment->id}")
-            ->assertOk()
-            ->assertJsonPath('data.id', $customerPayment->id);
-
-        $this->getJson("/api/payments/{$otherPayment->id}")->assertNotFound();
+        $this->getJson('/api/payments')->assertForbidden();
+        $this->getJson("/api/payments/{$customerPayment->id}")->assertForbidden();
+        $this->getJson("/api/payments/{$otherPayment->id}")->assertForbidden();
     }
 
     public function test_admin_can_create_update_show_and_delete_a_payment(): void
@@ -66,6 +58,11 @@ class PaymentControllerTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.payment_method', 'GCash');
 
+        $this->getJson('/api/payments?page=1&per_page=10')
+            ->assertOk()
+            ->assertJsonPath('data.0.booking.user.name', $booking->user->name)
+            ->assertJsonPath('meta.per_page', 10);
+
         $this->patchJson("/api/payments/{$paymentId}", [
             'payment_method' => 'Card',
             'payment_status' => 'Paid',
@@ -89,6 +86,7 @@ class PaymentControllerTest extends TestCase
         $payment = Payment::factory()->for($booking)->create();
         $this->getJson('/api/payments')->assertUnauthorized();
         $this->postJson('/api/payments', [])->assertUnauthorized();
+        $this->getJson("/api/payments/{$payment->id}")->assertUnauthorized();
 
         $this->authenticateAs($customer);
 
@@ -125,14 +123,38 @@ class PaymentControllerTest extends TestCase
         $this->assertSame(1, Payment::query()->where('booking_id', $booking->id)->count());
     }
 
-    private function createBookingFor(User $user): Booking
+    public function test_admin_can_only_record_payments_for_confirmed_bookings_and_supported_values(): void
+    {
+        $admin = User::factory()->create();
+        $admin->forceFill(['role' => 'admin'])->save();
+        $pendingBooking = $this->createBookingFor(User::factory()->create(), 'Pending');
+        $confirmedBooking = $this->createBookingFor(User::factory()->create(), 'Confirmed');
+        $this->authenticateAs($admin);
+
+        $this->postJson('/api/payments', [
+            'booking_id' => $pendingBooking->id,
+            'amount' => 100,
+            'payment_method' => 'Cash',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['booking_id']);
+
+        $this->postJson('/api/payments', [
+            'booking_id' => $confirmedBooking->id,
+            'amount' => 0,
+            'payment_method' => 'Crypto',
+            'payment_status' => 'Pending',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['amount', 'payment_method', 'payment_status']);
+    }
+
+    private function createBookingFor(User $user, string $status = 'Confirmed'): Booking
     {
         $travelPackage = TravelPackage::factory()->create();
 
         return Booking::factory()
             ->for($user)
             ->for($travelPackage)
-            ->create();
+            ->create(['status' => $status]);
     }
 
     private function authenticateAs(User $user): void

@@ -22,7 +22,7 @@ class PaymentController extends Controller
         return PaymentResource::collection(
             $this->visiblePayments($user)
                 ->orderBy('id')
-                ->paginate(15)
+                ->paginate(min(max($request->integer('per_page', 10), 1), 50))
                 ->withQueryString(),
         );
     }
@@ -31,7 +31,7 @@ class PaymentController extends Controller
     {
         $payment = Payment::create($request->validated());
 
-        return (new PaymentResource($payment->load('booking.travelPackage')))
+        return (new PaymentResource($payment->load(['booking.user', 'booking.travelPackage'])))
             ->response()
             ->setStatusCode(201);
     }
@@ -49,7 +49,7 @@ class PaymentController extends Controller
     {
         $payment->update($request->validated());
 
-        return new PaymentResource($payment->refresh()->load('booking.travelPackage'));
+        return new PaymentResource($payment->refresh()->load(['booking.user', 'booking.travelPackage']));
     }
 
     public function destroy(Payment $payment): JsonResponse
@@ -62,7 +62,7 @@ class PaymentController extends Controller
     private function visiblePayments(User $user): Builder
     {
         return Payment::query()
-            ->with('booking.travelPackage')
+            ->with(['booking.user', 'booking.travelPackage'])
             ->when(
                 ! $user->isAdmin(),
                 fn (Builder $query) => $query->whereHas(

@@ -13,6 +13,10 @@ export const fetchBookings = (params) => {
   return api.get('/bookings', { params: cleanParams }).then(normalizePage);
 };
 
+export const fetchBooking = (id) => api.get(`/bookings/${id}`).then(unwrap);
+export const createBooking = (payload) => api.post('/bookings', payload).then(unwrap);
+export const cancelBooking = (id) => api.patch(`/bookings/${id}/cancel`).then(unwrap);
+
 export const updateBookingStatus = (id, status) =>
   api.patch(`/bookings/${id}/status`, { status }).then(unwrap);
 

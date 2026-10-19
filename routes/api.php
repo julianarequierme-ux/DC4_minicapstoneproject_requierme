@@ -22,7 +22,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
 
     Route::apiResource('packages', TravelPackageController::class)->only(['index', 'show']);
-    Route::apiResource('payments', PaymentController::class)->only(['index', 'show']);
     Route::apiResource('bookings', BookingController::class)->except(['destroy']);
     Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])
         ->name('bookings.cancel');
@@ -32,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:admin')->group(function () {
         Route::apiResource('packages', TravelPackageController::class)->only(['store', 'update', 'destroy']);
-        Route::apiResource('payments', PaymentController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('payments', PaymentController::class);
         Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])
             ->name('bookings.status');
         Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])

@@ -15,6 +15,8 @@ import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminPackages from '../pages/admin/AdminPackages';
 import AdminBookings from '../pages/admin/AdminBookings';
 import AdminPayments from '../pages/admin/AdminPayments';
+import BookPackage from '../pages/BookPackage';
+import BookingDetails from '../pages/BookingDetails';
 
 export default function AppRoutes() {
   return (
@@ -27,7 +29,9 @@ export default function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/packages" element={<Packages />} />
         <Route path="/packages/:id" element={<PackageDetails />} />
+        <Route path="/packages/:id/book" element={<BookPackage />} />
         <Route path="/my-bookings" element={<MyBookings />} />
+        <Route path="/my-bookings/:id" element={<BookingDetails />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
 

@@ -28,12 +28,12 @@ class UpdatePaymentRequest extends FormRequest
                 'sometimes',
                 'required',
                 'integer',
-                'exists:bookings,id',
+                Rule::exists('bookings', 'id')->where('status', 'Confirmed'),
                 Rule::unique('payments', 'booking_id')->ignore($this->route('payment')),
             ],
-            'amount' => ['sometimes', 'required', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999.99'],
-            'payment_method' => ['sometimes', 'required', 'string', 'max:50'],
-            'payment_status' => ['sometimes', 'required', 'string', 'max:50'],
+            'amount' => ['sometimes', 'required', 'numeric', 'decimal:0,2', 'gt:0', 'max:99999999.99'],
+            'payment_method' => ['sometimes', 'required', 'string', Rule::in(['Cash', 'GCash', 'Card', 'Bank Transfer'])],
+            'payment_status' => ['sometimes', 'required', 'string', Rule::in(['Unpaid', 'Paid', 'Failed'])],
             'paid_at' => ['sometimes', 'nullable', 'date'],
         ];
     }
