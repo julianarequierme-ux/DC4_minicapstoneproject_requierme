@@ -6,9 +6,12 @@ import { parseApiError } from '../services/errors';
 export default function Navbar() {
   const { isAuthenticated, isAdmin, user, logout, authError } = useAuth();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
   const [logoutError, setLogoutError] = useState('');
+  const close = () => setOpen(false);
 
   const handleLogout = async () => {
+    close();
     setLogoutError('');
     try {
       await logout();
@@ -21,35 +24,46 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="brand">✈ TripEase</Link>
-      <div className="nav-links">
-        <Link to="/">Home</Link>
+      <Link to="/" className="brand" onClick={close}>✈ TripEase</Link>
+      <button
+        className="nav-toggle"
+        type="button"
+        aria-label="Toggle navigation menu"
+        aria-expanded={open}
+        aria-controls="primary-navigation"
+        onClick={() => setOpen((isOpen) => !isOpen)}
+      >
+        ☰
+      </button>
+
+      <div id="primary-navigation" className={`nav-links${open ? ' open' : ''}`}>
+        <Link to="/" onClick={close}>Home</Link>
         {isAuthenticated && !isAdmin && (
           <>
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/packages">Packages</Link>
-            <Link to="/my-bookings">My Bookings</Link>
-            <Link to="/profile">Profile</Link>
+            <Link to="/dashboard" onClick={close}>Dashboard</Link>
+            <Link to="/packages" onClick={close}>Packages</Link>
+            <Link to="/my-bookings" onClick={close}>My Bookings</Link>
+            <Link to="/profile" onClick={close}>Profile</Link>
           </>
         )}
         {isAdmin && (
           <>
-            <Link to="/admin/dashboard">Dashboard</Link>
-            <Link to="/admin/packages">Packages</Link>
-            <Link to="/admin/bookings">Bookings</Link>
-            <Link to="/admin/payments">Payments</Link>
+            <Link to="/admin/dashboard" onClick={close}>Dashboard</Link>
+            <Link to="/admin/packages" onClick={close}>Packages</Link>
+            <Link to="/admin/bookings" onClick={close}>Bookings</Link>
+            <Link to="/admin/payments" onClick={close}>Payments</Link>
           </>
         )}
         {!isAuthenticated && (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
+            <Link to="/login" onClick={close}>Login</Link>
+            <Link to="/register" onClick={close}>Register</Link>
           </>
         )}
         {isAuthenticated && (
           <>
             <span className="nav-user">{user?.name}</span>
-            <button className="nav-logout" onClick={handleLogout}>Logout</button>
+            <button className="nav-logout" type="button" onClick={handleLogout}>Logout</button>
           </>
         )}
       </div>
