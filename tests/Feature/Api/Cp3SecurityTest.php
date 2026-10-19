@@ -17,6 +17,7 @@ class Cp3SecurityTest extends TestCase
     {
         $this->getJson('/api/bookings')->assertUnauthorized();
         $this->getJson('/api/user')->assertUnauthorized();
+        $this->getJson('/api/dashboard')->assertUnauthorized();
     }
 
     public function test_customer_cannot_manage_packages_or_payments(): void
@@ -68,5 +69,41 @@ class Cp3SecurityTest extends TestCase
         $this->patchJson("/api/bookings/{$booking->id}/status", [
             'status' => 'Completed',
         ])->assertUnprocessable();
+    }
+
+    public function test_dashboard_returns_database_counts_to_admin_and_forbids_customers(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $firstCustomer = User::factory()->create();
+        $otherCustomer = User::factory()->create();
+        $package = TravelPackage::factory()->create();
+        $otherPackage = TravelPackage::factory()->create();
+        Booking::factory()
+            ->for($firstCustomer)
+            ->for($package)
+            ->create(['status' => 'Pending']);
+        Booking::factory()
+            ->for($otherCustomer)
+            ->for($otherPackage)
+            ->create(['status' => 'Confirmed']);
+        Booking::factory()
+            ->for($otherCustomer)
+            ->for($otherPackage)
+            ->create(['status' => 'Completed']);
+
+        Sanctum::actingAs($admin);
+        $this->getJson('/api/dashboard')
+            ->assertOk()
+            ->assertExactJson([
+                'total_packages' => 2,
+                'total_bookings' => 3,
+                'pending_bookings' => 1,
+                'approved_bookings' => 1,
+                'completed_bookings' => 1,
+                'total_customers' => 2,
+            ]);
+
+        Sanctum::actingAs($firstCustomer);
+        $this->getJson('/api/dashboard')->assertForbidden();
     }
 }

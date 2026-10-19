@@ -110,12 +110,17 @@ class BookingControllerTest extends TestCase
     {
         $customer = User::factory()->create();
         $otherCustomer = User::factory()->create();
-        $package = TravelPackage::factory()->create();
+        $package = TravelPackage::factory()->create([
+            'title' => 'Customer Island Escape',
+        ]);
         $ownedBooking = $this->createBooking($customer, $package, [
             'booking_date' => '2026-11-10',
             'status' => 'Pending',
         ]);
-        $otherBooking = $this->createBooking($otherCustomer, $package, [
+        $otherPackage = TravelPackage::factory()->create([
+            'title' => 'Other Customer Journey',
+        ]);
+        $otherBooking = $this->createBooking($otherCustomer, $otherPackage, [
             'booking_date' => '2026-12-10',
             'status' => 'Confirmed',
         ]);
@@ -132,6 +137,17 @@ class BookingControllerTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.id', $ownedBooking->id);
         $this->getJson("/api/bookings/{$otherBooking->id}")->assertNotFound();
+
+        $this->getJson('/api/bookings?search=Customer%20Island&status=Pending&per_page=1')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $ownedBooking->id)
+            ->assertJsonPath('meta.per_page', 1)
+            ->assertJsonPath('meta.total', 1);
+
+        $this->getJson('/api/bookings?search=Other%20Customer')
+            ->assertOk()
+            ->assertJsonCount(0, 'data');
         $this->getJson('/api/bookings?status=Approved')
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['status']);

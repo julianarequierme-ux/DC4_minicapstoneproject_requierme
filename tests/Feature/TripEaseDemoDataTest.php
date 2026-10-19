@@ -39,7 +39,7 @@ class TripEaseDemoDataTest extends TestCase
             Booking::query()->orderBy('booking_date')->pluck('status')->all(),
         );
         $this->assertSame(4, Booking::query()->whereHas('payment')->count());
-        $this->assertFalse(Schema::hasColumn('travel_packages', 'category'));
+        $this->assertTrue(Schema::hasColumn('travel_packages', 'category'));
 
         foreach (Booking::query()->with('payment')->get() as $booking) {
             $this->assertSame($booking->total_amount, $booking->payment->amount);

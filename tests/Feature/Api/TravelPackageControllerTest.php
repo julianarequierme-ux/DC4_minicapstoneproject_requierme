@@ -19,6 +19,7 @@ class TravelPackageControllerTest extends TestCase
         TravelPackage::factory()->create([
             'title' => 'Boracay Island Escape',
             'destination' => 'Boracay, Aklan',
+            'category' => 'Beach',
             'price' => 12000,
             'duration_days' => 3,
             'status' => 'active',
@@ -26,6 +27,7 @@ class TravelPackageControllerTest extends TestCase
         TravelPackage::factory()->create([
             'title' => 'Boracay Family Week',
             'destination' => 'Boracay, Aklan',
+            'category' => 'Family',
             'price' => 22000,
             'duration_days' => 7,
             'status' => 'active',
@@ -33,6 +35,7 @@ class TravelPackageControllerTest extends TestCase
         TravelPackage::factory()->create([
             'title' => 'El Nido Island Hopping',
             'destination' => 'El Nido, Palawan',
+            'category' => 'Adventure',
             'price' => 18000,
             'duration_days' => 4,
             'status' => 'inactive',
@@ -50,6 +53,12 @@ class TravelPackageControllerTest extends TestCase
             ->assertJsonPath('data.0.title', 'El Nido Island Hopping')
             ->assertJsonPath('meta.current_page', 2)
             ->assertJsonPath('meta.per_page', 2);
+
+        $this->getJson('/api/packages?category=Beach&status=active&min_price=10000&max_price=15000')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.category', 'Beach')
+            ->assertJsonPath('data.0.title', 'Boracay Island Escape');
     }
 
     public function test_package_search_matches_destination_and_rejects_invalid_filter_ranges(): void
@@ -70,6 +79,36 @@ class TravelPackageControllerTest extends TestCase
             ->assertJsonValidationErrors(['max_price']);
     }
 
+    public function test_package_search_matches_description_and_per_page_defaults_to_ten_with_a_maximum_of_fifty(): void
+    {
+        $customer = User::factory()->create();
+        $this->authenticateAs($customer);
+
+        TravelPackage::factory()->count(11)->create();
+        $descriptionMatch = TravelPackage::factory()->create([
+            'description' => 'A private lagoon snorkeling excursion.',
+        ]);
+
+        $this->getJson('/api/packages?search=snorkeling')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $descriptionMatch->id);
+
+        $this->getJson('/api/packages')
+            ->assertOk()
+            ->assertJsonPath('meta.per_page', 10)
+            ->assertJsonPath('meta.total', 12);
+
+        $this->getJson('/api/packages?per_page=50')
+            ->assertOk()
+            ->assertJsonPath('meta.per_page', 50)
+            ->assertJsonCount(12, 'data');
+
+        $this->getJson('/api/packages?per_page=51')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['per_page']);
+    }
+
     public function test_admin_can_create_update_show_and_delete_a_package(): void
     {
         $admin = User::factory()->create();
@@ -79,18 +118,18 @@ class TravelPackageControllerTest extends TestCase
         $created = $this->postJson('/api/packages', [
             'title' => 'Coron Lake Adventure',
             'destination' => 'Coron, Palawan',
+            'category' => 'Adventure',
             'description' => 'Visit the lakes and reefs of Coron.',
             'price' => '17500.00',
             'duration_days' => 4,
             'availability' => 12,
             'status' => 'active',
-            'category' => 'Adventure',
         ]);
 
         $created->assertCreated()
             ->assertJsonPath('data.title', 'Coron Lake Adventure')
-            ->assertJsonPath('data.price', '17500.00')
-            ->assertJsonMissingPath('data.category');
+            ->assertJsonPath('data.category', 'Adventure')
+            ->assertJsonPath('data.price', '17500.00');
 
         $packageId = $created->json('data.id');
         $this->assertDatabaseHas('travel_packages', [

@@ -25,11 +25,12 @@ class IndexTravelPackageRequest extends FormRequest
         return [
             'search' => ['sometimes', 'string', 'max:255'],
             'destination' => ['sometimes', 'string', 'max:255'],
+            'category' => ['sometimes', 'string', 'max:100'],
             'status' => ['sometimes', 'string', 'max:50'],
             'min_price' => ['sometimes', 'numeric', 'min:0'],
             'max_price' => ['sometimes', 'numeric', 'min:0', 'gte:min_price'],
             'duration_days' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:50'],
         ];
     }
 }

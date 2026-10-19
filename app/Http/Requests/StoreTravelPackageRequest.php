@@ -25,6 +25,7 @@ class StoreTravelPackageRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'destination' => ['required', 'string', 'max:255'],
+            'category' => ['sometimes', 'nullable', 'string', 'max:100'],
             'description' => ['required', 'string'],
             'price' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999.99'],
             'duration_days' => ['required', 'integer', 'min:1'],

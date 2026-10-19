@@ -18,6 +18,7 @@ class TravelPackageResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'destination' => $this->destination,
+            'category' => $this->category,
             'description' => $this->description,
             'price' => $this->price,
             'duration_days' => $this->duration_days,

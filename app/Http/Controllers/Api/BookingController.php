@@ -30,6 +30,23 @@ class BookingController extends Controller
             $query->where('status', $filters['status']);
         }
 
+        if (isset($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function (Builder $query) use ($search): void {
+                if (is_numeric($search)) {
+                    $query->where('id', (int) $search);
+                }
+
+                $query->orWhereHas('user', function (Builder $userQuery) use ($search): void {
+                    $userQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })->orWhereHas('travelPackage', function (Builder $packageQuery) use ($search): void {
+                    $packageQuery->where('title', 'like', "%{$search}%")
+                        ->orWhere('destination', 'like', "%{$search}%");
+                });
+            });
+        }
+
         if (isset($filters['date_from'])) {
             $query->whereDate('booking_date', '>=', $filters['date_from']);
         }

@@ -23,11 +23,12 @@ class TravelPackageController extends Controller
             $search = $filters['search'];
             $query->where(function (Builder $query) use ($search): void {
                 $query->where('title', 'like', "%{$search}%")
-                    ->orWhere('destination', 'like', "%{$search}%");
+                    ->orWhere('destination', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        foreach (['destination', 'status'] as $filter) {
+        foreach (['destination', 'category', 'status'] as $filter) {
             if (isset($filters[$filter])) {
                 $query->where($filter, $filters[$filter]);
             }
@@ -46,7 +47,7 @@ class TravelPackageController extends Controller
         }
 
         return TravelPackageResource::collection(
-            $query->orderBy('id')->paginate($filters['per_page'] ?? 15)->withQueryString(),
+            $query->orderBy('id')->paginate($filters['per_page'] ?? 10)->withQueryString(),
         );
     }
 
