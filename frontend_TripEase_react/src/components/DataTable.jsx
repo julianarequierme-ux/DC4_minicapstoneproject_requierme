@@ -1,3 +1,5 @@
+import Spinner from './Spinner';
+
 export default function DataTable({
   columns,
   data,
@@ -5,7 +7,7 @@ export default function DataTable({
   emptyMessage = 'No records found.',
 }) {
   if (loading) {
-    return <p className="state-msg">Loading...</p>;
+    return <Spinner />;
   }
   if (!data || data.length === 0) {
     return <p className="state-msg">{emptyMessage}</p>;
