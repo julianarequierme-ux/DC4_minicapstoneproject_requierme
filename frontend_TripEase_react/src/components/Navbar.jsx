@@ -27,6 +27,7 @@ export default function Navbar() {
         {isAuthenticated && !isAdmin && (
           <>
             <Link to="/dashboard">Dashboard</Link>
+            <Link to="/packages">Packages</Link>
             <Link to="/my-bookings">My Bookings</Link>
             <Link to="/profile">Profile</Link>
           </>
