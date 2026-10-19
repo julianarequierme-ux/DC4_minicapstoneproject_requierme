@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import { parseApiError } from '../services/errors';
 
@@ -37,27 +37,27 @@ export default function Navbar() {
       </button>
 
       <div id="primary-navigation" className={`nav-links${open ? ' open' : ''}`}>
-        <Link to="/" onClick={close}>Home</Link>
+        <NavLink to="/" end onClick={close}>Home</NavLink>
         {isAuthenticated && !isAdmin && (
           <>
-            <Link to="/my-dashboard" onClick={close}>Dashboard</Link>
-            <Link to="/packages" onClick={close}>Packages</Link>
-            <Link to="/my-bookings" onClick={close}>My Bookings</Link>
-            <Link to="/profile" onClick={close}>Profile</Link>
+            <NavLink to="/my-dashboard" onClick={close}>Dashboard</NavLink>
+            <NavLink to="/packages" onClick={close}>Packages</NavLink>
+            <NavLink to="/my-bookings" onClick={close}>My Bookings</NavLink>
+            <NavLink to="/profile" onClick={close}>Profile</NavLink>
           </>
         )}
         {isAdmin && (
           <>
-            <Link to="/dashboard" onClick={close}>Dashboard</Link>
-            <Link to="/admin/packages" onClick={close}>Packages</Link>
-            <Link to="/admin/bookings" onClick={close}>Bookings</Link>
-            <Link to="/admin/payments" onClick={close}>Payments</Link>
+            <NavLink to="/dashboard" onClick={close}>Dashboard</NavLink>
+            <NavLink to="/admin/packages" onClick={close}>Packages</NavLink>
+            <NavLink to="/admin/bookings" onClick={close}>Bookings</NavLink>
+            <NavLink to="/admin/payments" onClick={close}>Payments</NavLink>
           </>
         )}
         {!isAuthenticated && (
           <>
-            <Link to="/login" onClick={close}>Login</Link>
-            <Link to="/register" onClick={close}>Register</Link>
+            <NavLink to="/login" onClick={close}>Login</NavLink>
+            <NavLink to="/register" onClick={close}>Register</NavLink>
           </>
         )}
         {isAuthenticated && (
