@@ -17,113 +17,105 @@ import {
 import { parseApiError } from '../../services/errors';
 
 export default function AdminPackages() {
-  const packageList = usePackageList(9);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingPackage, setEditingPackage] = useState(null);
-  const [deletingPackage, setDeletingPackage] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [deleteError, setDeleteError] = useState('');
+  const list = usePackageList(10);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [serverErrors, setServerErrors] = useState({});
+  const [formMessage, setFormMessage] = useState('');
+  const [toDelete, setToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [pageError, setPageError] = useState('');
 
-  const openCreateForm = () => {
-    setEditingPackage(null);
-    setIsFormOpen(true);
+  const openCreate = () => {
+    setEditing(null);
+    setServerErrors({});
+    setFormMessage('');
+    setFormOpen(true);
   };
 
-  const openEditForm = (travelPackage) => {
-    setEditingPackage(travelPackage);
-    setIsFormOpen(true);
+  const openEdit = (travelPackage) => {
+    setEditing(travelPackage);
+    setServerErrors({});
+    setFormMessage('');
+    setFormOpen(true);
   };
 
   const closeForm = () => {
-    if (!isSaving) {
-      setIsFormOpen(false);
-      setEditingPackage(null);
+    if (!saving) {
+      setFormOpen(false);
     }
   };
 
-  const handleSave = async (payload) => {
-    setIsSaving(true);
-    setSuccessMessage('');
+  const handleSave = async (values) => {
+    setSaving(true);
+    setServerErrors({});
+    setFormMessage('');
+    setPageError('');
 
     try {
-      if (editingPackage) {
-        await updatePackage(editingPackage.id, payload);
-        setSuccessMessage('Package updated successfully.');
+      if (editing) {
+        await updatePackage(editing.id, values);
       } else {
-        await createPackage(payload);
-        setSuccessMessage('Package created successfully.');
+        await createPackage(values);
       }
-      setIsFormOpen(false);
-      setEditingPackage(null);
-      packageList.reload();
+      setFormOpen(false);
+      setSuccess(editing ? 'Package updated successfully.' : 'Package created successfully.');
+      list.reload();
+    } catch (error) {
+      const parsed = parseApiError(error);
+      setFormMessage(parsed.message);
+      setServerErrors(parsed.errors);
     } finally {
-      setIsSaving(false);
+      setSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!deletingPackage) {
+    if (!toDelete) {
       return;
     }
 
-    setIsDeleting(true);
-    setDeleteError('');
-    setSuccessMessage('');
+    setDeleting(true);
+    setPageError('');
+    setSuccess('');
 
     try {
-      await deletePackage(deletingPackage.id);
-      setSuccessMessage('Package deleted successfully.');
-      setDeletingPackage(null);
-
-      if (packageList.items.length === 1 && packageList.page > 1) {
-        packageList.setPage(packageList.page - 1);
+      await deletePackage(toDelete.id);
+      setToDelete(null);
+      setSuccess('Package deleted successfully.');
+      if (list.items.length === 1 && list.page > 1) {
+        list.setPage(list.page - 1);
       } else {
-        packageList.reload();
+        list.reload();
       }
     } catch (error) {
-      setDeleteError(parseApiError(error).message);
+      setToDelete(null);
+      setPageError(parseApiError(error).message);
     } finally {
-      setIsDeleting(false);
+      setDeleting(false);
     }
   };
 
   const columns = [
     { key: 'title', label: 'Title' },
     { key: 'destination', label: 'Destination' },
-    {
-      key: 'price',
-      label: 'Price',
-      render: (travelPackage) => formatPrice(travelPackage.price),
-    },
-    {
-      key: 'duration_days',
-      label: 'Duration',
-      render: (travelPackage) => `${travelPackage.duration_days} day(s)`,
-    },
+    { key: 'price', label: 'Price', render: (row) => formatPrice(row.price) },
+    { key: 'duration_days', label: 'Days' },
     { key: 'availability', label: 'Availability' },
-    {
-      key: 'status',
-      label: 'Status',
-      render: (travelPackage) => <StatusBadge status={travelPackage.status} />,
-    },
+    { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     {
       key: 'actions',
       label: 'Actions',
-      render: (travelPackage) => (
+      render: (row) => (
         <div className="row-actions">
-          <Button
-            variant="secondary"
-            onClick={() => openEditForm(travelPackage)}
-          >
-            Edit
-          </Button>
+          <Button variant="secondary" onClick={() => openEdit(row)}>Edit</Button>
           <Button
             variant="danger"
             onClick={() => {
-              setDeleteError('');
-              setDeletingPackage(travelPackage);
+              setPageError('');
+              setToDelete(row);
             }}
           >
             Delete
@@ -137,83 +129,72 @@ export default function AdminPackages() {
     <div className="container">
       <div className="toolbar">
         <h2>Manage Packages</h2>
-        <Button onClick={openCreateForm}>Add package</Button>
+        <Button onClick={openCreate}>+ New package</Button>
       </div>
 
-      <PackageFilters
-        search={packageList.search}
-        onSearch={packageList.setSearch}
-        status={packageList.status}
-        onStatus={packageList.setStatus}
-      />
-
-      <Alert type="success" onClose={() => setSuccessMessage('')}>
-        {successMessage}
+      <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>
+      <Alert type="error" onClose={() => setPageError('')}>
+        {pageError || list.error}
       </Alert>
-      <Alert type="error">{packageList.error}</Alert>
+
+      <PackageFilters
+        search={list.search}
+        onSearch={list.setSearch}
+        status={list.status}
+        onStatus={list.setStatus}
+      />
 
       <DataTable
         columns={columns}
-        data={packageList.items}
-        loading={packageList.loading}
-        emptyMessage="No packages found. Try a different search or filter."
+        data={list.items}
+        loading={list.loading}
+        emptyMessage="No packages found. Create one or change your search."
       />
-
-      <Pagination
-        page={packageList.page}
-        lastPage={packageList.lastPage}
-        onChange={packageList.setPage}
-      />
-      {!packageList.loading && packageList.total > 0 && (
-        <p className="state-msg">{packageList.total} package(s) total</p>
+      <Pagination page={list.page} lastPage={list.lastPage} onChange={list.setPage} />
+      {!list.loading && list.total > 0 && (
+        <p className="state-msg">{list.total} package(s) total</p>
       )}
 
       <Modal
-        isOpen={isFormOpen}
-        title={editingPackage ? 'Edit package' : 'Add package'}
+        isOpen={formOpen}
+        title={editing ? 'Edit package' : 'New package'}
         onClose={closeForm}
       >
+        <Alert type="error">{formMessage}</Alert>
         <PackageForm
-          key={editingPackage?.id ?? 'new-package'}
-          initialValues={editingPackage}
+          key={editing?.id ?? 'new'}
+          initial={editing}
           onSubmit={handleSave}
           onCancel={closeForm}
-          submitting={isSaving}
+          submitting={saving}
+          serverErrors={serverErrors}
         />
       </Modal>
 
       <Modal
-        isOpen={Boolean(deletingPackage)}
+        isOpen={Boolean(toDelete)}
         title="Delete package"
         onClose={() => {
-          if (!isDeleting) {
-            setDeletingPackage(null);
-            setDeleteError('');
+          if (!deleting) {
+            setToDelete(null);
           }
         }}
         footer={
           <>
             <Button
               variant="secondary"
-              disabled={isDeleting}
-              onClick={() => {
-                setDeletingPackage(null);
-                setDeleteError('');
-              }}
+              onClick={() => setToDelete(null)}
+              disabled={deleting}
             >
               Cancel
             </Button>
-            <Button variant="danger" loading={isDeleting} onClick={handleDelete}>
-              Delete package
+            <Button variant="danger" loading={deleting} onClick={handleDelete}>
+              Yes, delete
             </Button>
           </>
         }
       >
-        <Alert type="error">{deleteError}</Alert>
-        <p>
-          Are you sure you want to delete{' '}
-          <strong>{deletingPackage?.title}</strong>? This action cannot be undone.
-        </p>
+        Delete <strong>{toDelete?.title}</strong>? This cannot be undone.
       </Modal>
     </div>
   );

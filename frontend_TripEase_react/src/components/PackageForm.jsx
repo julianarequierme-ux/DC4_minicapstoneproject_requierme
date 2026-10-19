@@ -1,135 +1,109 @@
 import { useState } from 'react';
-import Alert from './Alert';
 import Button from './Button';
 import FormInput from './FormInput';
 import { STATUS_OPTIONS } from '../services/packageService';
-import { parseApiError } from '../services/errors';
 
-const emptyForm = {
+const EMPTY = {
   title: '',
   destination: '',
   description: '',
   price: '',
   duration_days: '',
   availability: '',
-  status: 'active',
+  status: STATUS_OPTIONS[0],
 };
 
-function getFormValues(initialValues) {
-  return initialValues
-    ? {
-        title: initialValues.title ?? '',
-        destination: initialValues.destination ?? '',
-        description: initialValues.description ?? '',
-        price: initialValues.price ?? '',
-        duration_days: initialValues.duration_days ?? '',
-        availability: initialValues.availability ?? '',
-        status: initialValues.status ?? 'active',
-      }
-    : emptyForm;
-}
-
 export default function PackageForm({
-  initialValues,
+  initial,
   onSubmit,
   onCancel,
   submitting = false,
+  serverErrors = {},
 }) {
-  const [form, setForm] = useState(() => getFormValues(initialValues));
-  const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState('');
+  const [form, setForm] = useState({ ...EMPTY, ...(initial || {}) });
+  const [clientErrors, setClientErrors] = useState({});
+  const [changedFields, setChangedFields] = useState({});
+
+  const errors = { ...serverErrors, ...clientErrors };
+  for (const field of Object.keys(errors)) {
+    errors[field] = clientErrors[field] ?? (
+      changedFields[field] ? undefined : serverErrors[field]
+    );
+  }
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((currentForm) => ({ ...currentForm, [name]: value }));
-    setErrors((currentErrors) => ({ ...currentErrors, [name]: undefined }));
-    setMessage('');
+    setClientErrors((currentErrors) => ({ ...currentErrors, [name]: undefined }));
+    setChangedFields((currentFields) => ({ ...currentFields, [name]: true }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    const clientErrors = {};
+  const validate = () => {
+    const nextErrors = {};
     if (!form.title.trim()) {
-      clientErrors.title = 'Title is required.';
+      nextErrors.title = 'Title is required.';
     }
     if (!form.destination.trim()) {
-      clientErrors.destination = 'Destination is required.';
+      nextErrors.destination = 'Destination is required.';
     }
     if (!form.description.trim()) {
-      clientErrors.description = 'Description is required.';
+      nextErrors.description = 'Description is required.';
     }
-    if (form.price === '' || !Number.isFinite(Number(form.price)) || Number(form.price) < 0) {
-      clientErrors.price = 'Enter a valid price of zero or more.';
+    if (form.price === '' || !Number.isFinite(Number(form.price)) || Number(form.price) <= 0) {
+      nextErrors.price = 'Price must be greater than 0.';
     }
     if (!Number.isInteger(Number(form.duration_days)) || Number(form.duration_days) < 1) {
-      clientErrors.duration_days = 'Duration must be at least 1 day.';
+      nextErrors.duration_days = 'Duration must be at least 1 day.';
     }
     if (
       form.availability === ''
       || !Number.isInteger(Number(form.availability))
       || Number(form.availability) < 0
     ) {
-      clientErrors.availability = 'Availability must be zero or more slots.';
+      nextErrors.availability = 'Availability must be 0 or more.';
     }
+    if (!STATUS_OPTIONS.includes(form.status)) {
+      nextErrors.status = 'Choose a valid status.';
+    }
+    return nextErrors;
+  };
 
-    setErrors(clientErrors);
-    setMessage('');
-    if (Object.keys(clientErrors).length > 0) {
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const validationErrors = validate();
+    setClientErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
       return;
     }
 
-    try {
-      await onSubmit({
-        ...form,
-        price: Number(form.price),
-        duration_days: Number(form.duration_days),
-        availability: Number(form.availability),
-      });
-    } catch (error) {
-      const parsedError = parseApiError(error);
-      setMessage(parsedError.message);
-      setErrors(parsedError.errors);
-    }
+    setChangedFields({});
+    onSubmit({
+      ...form,
+      price: Number(form.price),
+      duration_days: Number(form.duration_days),
+      availability: Number(form.availability),
+    });
   };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <Alert type="error">{message}</Alert>
       <div className="form-grid">
-        <FormInput
-          label="Title"
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          error={errors.title}
-          required
-        />
+        <div className="full">
+          <FormInput
+            label="Title"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            error={errors.title}
+          />
+        </div>
         <FormInput
           label="Destination"
           name="destination"
           value={form.destination}
           onChange={handleChange}
           error={errors.destination}
-          required
         />
-        <div className="form-group full">
-          <label htmlFor="package-description">Description</label>
-          <textarea
-            id="package-description"
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            className={errors.description ? 'input-error' : ''}
-            required
-            rows="4"
-          />
-          {errors.description && (
-            <small className="error-text">
-              {Array.isArray(errors.description) ? errors.description[0] : errors.description}
-            </small>
-          )}
-        </div>
         <FormInput
           label="Price (PHP)"
           name="price"
@@ -137,7 +111,6 @@ export default function PackageForm({
           value={form.price}
           onChange={handleChange}
           error={errors.price}
-          required
         />
         <FormInput
           label="Duration (days)"
@@ -146,21 +119,19 @@ export default function PackageForm({
           value={form.duration_days}
           onChange={handleChange}
           error={errors.duration_days}
-          required
         />
         <FormInput
-          label="Availability (slots)"
+          label="Availability"
           name="availability"
           type="number"
           value={form.availability}
           onChange={handleChange}
           error={errors.availability}
-          required
         />
         <div className="form-group">
-          <label htmlFor="package-status">Status</label>
+          <label htmlFor="status">Status</label>
           <select
-            id="package-status"
+            id="status"
             name="status"
             value={form.status}
             onChange={handleChange}
@@ -178,13 +149,34 @@ export default function PackageForm({
             </small>
           )}
         </div>
+        <div className="form-group full">
+          <label htmlFor="description">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            rows="4"
+            value={form.description || ''}
+            onChange={handleChange}
+            className={errors.description ? 'input-error' : ''}
+          />
+          {errors.description && (
+            <small className="error-text">
+              {Array.isArray(errors.description)
+                ? errors.description[0]
+                : errors.description}
+            </small>
+          )}
+        </div>
       </div>
-      <div className="modal-footer">
-        <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
+      <div className="row-actions">
+        <Button type="submit" loading={submitting}>Save</Button>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onCancel}
+          disabled={submitting}
+        >
           Cancel
-        </Button>
-        <Button type="submit" loading={submitting}>
-          Save package
         </Button>
       </div>
     </form>
