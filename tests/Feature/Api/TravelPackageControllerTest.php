@@ -44,6 +44,12 @@ class TravelPackageControllerTest extends TestCase
             ->assertJsonPath('meta.per_page', 1)
             ->assertJsonPath('meta.total', 1)
             ->assertJsonMissing(['title' => 'El Nido Island Hopping']);
+
+        $this->getJson('/api/packages?page=2&per_page=2')
+            ->assertOk()
+            ->assertJsonPath('data.0.title', 'El Nido Island Hopping')
+            ->assertJsonPath('meta.current_page', 2)
+            ->assertJsonPath('meta.per_page', 2);
     }
 
     public function test_package_search_matches_destination_and_rejects_invalid_filter_ranges(): void
@@ -103,9 +109,14 @@ class TravelPackageControllerTest extends TestCase
             ->assertJsonPath('data.price', '18500.00')
             ->assertJsonPath('data.availability', 9);
 
+        $this->putJson("/api/packages/{$packageId}", [
+            'price' => '19500.00',
+        ])->assertOk()
+            ->assertJsonPath('data.price', '19500.00');
+
         $this->assertDatabaseHas('travel_packages', [
             'id' => $packageId,
-            'price' => '18500.00',
+            'price' => '19500.00',
             'availability' => 9,
         ]);
 
@@ -131,6 +142,7 @@ class TravelPackageControllerTest extends TestCase
         ])->assertForbidden();
 
         $this->patchJson("/api/packages/{$package->id}", ['price' => 1])->assertForbidden();
+        $this->putJson("/api/packages/{$package->id}", ['price' => 1])->assertForbidden();
         $this->deleteJson("/api/packages/{$package->id}")->assertForbidden();
         $this->assertDatabaseMissing('travel_packages', ['title' => 'Unauthorized Package']);
     }
@@ -158,6 +170,13 @@ class TravelPackageControllerTest extends TestCase
             'price' => '100.123',
             'duration_days' => 1,
             'availability' => 1,
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['price']);
+
+        $package = TravelPackage::factory()->create();
+
+        $this->putJson("/api/packages/{$package->id}", [
+            'price' => -1,
         ])->assertUnprocessable()
             ->assertJsonValidationErrors(['price']);
     }
