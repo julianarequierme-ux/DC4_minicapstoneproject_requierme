@@ -248,6 +248,21 @@ body {
   color: #b42318;
 }
 
+.badge-paid {
+  background: #e7f6ec;
+  color: #17653a;
+}
+
+.badge-unpaid {
+  background: #fff4d6;
+  color: #8a5b00;
+}
+
+.badge-failed {
+  background: #fdeaea;
+  color: #b42318;
+}
+
 .pagination {
   display: flex;
   gap: 6px;
