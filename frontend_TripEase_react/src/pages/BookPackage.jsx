@@ -6,6 +6,8 @@ import FormInput from '../components/FormInput';
 import { parseApiError } from '../services/errors';
 import { createBooking } from '../services/bookingService';
 import { fetchPackage, formatPrice } from '../services/packageService';
+import { showToast } from '../services/toasts';
+import Spinner from '../components/Spinner';
 
 const localToday = () => {
   const date = new Date();
@@ -96,11 +98,13 @@ export default function BookPackage() {
         booking_date: form.booking_date,
         special_request: form.special_request || null,
       });
+      showToast('success', 'Booking submitted. Status: Pending.');
       navigate('/my-bookings', { state: { message: 'Booking submitted. Status: Pending.' } });
     } catch (requestError) {
       const parsed = parseApiError(requestError);
       setMessage(parsed.message);
       setErrors(parsed.errors);
+      showToast('error', parsed.message);
     } finally {
       setSubmitting(false);
     }
@@ -109,7 +113,7 @@ export default function BookPackage() {
   return (
     <div className="container">
       <Link to={`/packages/${id}`}>← Back to package</Link>
-      {loading && <p className="state-msg">Loading...</p>}
+      {loading && <Spinner label="Loading package..." />}
       <Alert type="error">{loadError}</Alert>
 
       {travelPackage && (

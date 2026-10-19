@@ -7,6 +7,7 @@ import Pagination from '../../components/Pagination';
 import { fetchBookings, formatDate } from '../../services/bookingService';
 import { parseApiError } from '../../services/errors';
 import { formatPrice } from '../../services/packageService';
+import { showToast } from '../../services/toasts';
 import {
   createPayment,
   fetchPayments,
@@ -151,12 +152,15 @@ export default function AdminPayments() {
       }
 
       setModalOpen(false);
-      setSuccess(editing ? 'Payment updated.' : 'Payment recorded.');
+      const message = editing ? 'Payment updated.' : 'Payment recorded.';
+      setSuccess(message);
+      showToast('success', message);
       setReloadKey((currentKey) => currentKey + 1);
     } catch (requestError) {
       const parsed = parseApiError(requestError);
       setFormMessage(parsed.message);
       setErrors(parsed.errors);
+      showToast('error', parsed.message);
     } finally {
       setSaving(false);
     }

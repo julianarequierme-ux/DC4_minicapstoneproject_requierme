@@ -4,6 +4,7 @@ import Button from '../components/Button';
 import FormInput from '../components/FormInput';
 import useAuth from '../hooks/useAuth';
 import { parseApiError } from '../services/errors';
+import { showToast } from '../services/toasts';
 
 export default function Register() {
   const { register } = useAuth();
@@ -33,6 +34,8 @@ export default function Register() {
     }
     if (!form.email.trim()) {
       clientErrors.email = 'Email is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      clientErrors.email = 'Enter a valid email address.';
     }
     if (form.password.length < 8) {
       clientErrors.password = 'Password must be at least 8 characters.';
@@ -48,6 +51,7 @@ export default function Register() {
     setSubmitting(true);
     try {
       await register(form);
+      showToast('success', 'Registration successful. Please log in.');
       navigate('/login', {
         state: { message: 'Registration successful. Please log in.' },
       });
@@ -55,6 +59,7 @@ export default function Register() {
       const parsed = parseApiError(error);
       setMessage(parsed.message);
       setErrors(parsed.errors);
+      showToast('error', parsed.message);
     } finally {
       setSubmitting(false);
     }

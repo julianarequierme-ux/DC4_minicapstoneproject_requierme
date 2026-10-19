@@ -4,9 +4,11 @@ import Alert from '../components/Alert';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
+import Spinner from '../components/Spinner';
 import { cancelBooking, fetchBooking, formatDate } from '../services/bookingService';
 import { parseApiError } from '../services/errors';
 import { formatPrice } from '../services/packageService';
+import { showToast } from '../services/toasts';
 
 export default function BookingDetails() {
   const { id } = useParams();
@@ -55,8 +57,11 @@ export default function BookingDetails() {
       const updatedBooking = await cancelBooking(id);
       setResult({ id, booking: updatedBooking, error: '' });
       setSuccess('Booking cancelled.');
+      showToast('success', 'Booking cancelled.');
     } catch (requestError) {
-      setError(parseApiError(requestError).message);
+      const message = parseApiError(requestError).message;
+      setError(message);
+      showToast('error', message);
     } finally {
       setCancelling(false);
       setConfirmOpen(false);
@@ -66,7 +71,7 @@ export default function BookingDetails() {
   return (
     <div className="container">
       <Link to="/my-bookings">← Back to my bookings</Link>
-      {loading && <p className="state-msg">Loading...</p>}
+      {loading && <Spinner label="Loading booking..." />}
       <Alert type="error">{loadError || error}</Alert>
       <Alert type="success">{success}</Alert>
 

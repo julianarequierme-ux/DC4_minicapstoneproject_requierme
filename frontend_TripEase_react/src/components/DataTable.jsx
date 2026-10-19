@@ -10,7 +10,7 @@ export default function DataTable({
     return <Spinner />;
   }
   if (!data || data.length === 0) {
-    return <p className="state-msg">{emptyMessage}</p>;
+    return <div className="state-msg">{emptyMessage}</div>;
   }
 
   return (

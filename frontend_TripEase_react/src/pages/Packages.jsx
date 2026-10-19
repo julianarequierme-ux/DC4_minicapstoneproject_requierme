@@ -5,6 +5,7 @@ import Pagination from '../components/Pagination';
 import StatusBadge from '../components/StatusBadge';
 import usePackageList from '../hooks/usePackageList';
 import { formatPrice } from '../services/packageService';
+import Button from '../components/Button';
 
 export default function Packages() {
   const packageList = usePackageList(9);
@@ -26,7 +27,10 @@ export default function Packages() {
       {packageList.loading && <p className="state-msg">Loading packages...</p>}
 
       {!packageList.loading && !packageList.error && packageList.items.length === 0 && (
-        <p className="state-msg">No packages found. Try a different search or filter.</p>
+        <div className="state-msg empty-state">
+          <p>No packages found. Try a different search or filter.</p>
+          <Button variant="secondary" onClick={packageList.clearFilters}>Clear filters</Button>
+        </div>
       )}
 
       <div className="card-grid">

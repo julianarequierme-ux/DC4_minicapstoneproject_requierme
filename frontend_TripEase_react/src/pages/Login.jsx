@@ -4,6 +4,7 @@ import Button from '../components/Button';
 import FormInput from '../components/FormInput';
 import useAuth from '../hooks/useAuth';
 import { parseApiError } from '../services/errors';
+import { showToast } from '../services/toasts';
 
 export default function Login() {
   const { login, isAuthenticated, isAdmin, loading } = useAuth();
@@ -30,6 +31,8 @@ export default function Login() {
     const clientErrors = {};
     if (!form.email.trim()) {
       clientErrors.email = 'Email is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      clientErrors.email = 'Enter a valid email address.';
     }
     if (!form.password) {
       clientErrors.password = 'Password is required.';
@@ -51,6 +54,7 @@ export default function Login() {
       const parsed = parseApiError(error);
       setMessage(parsed.message);
       setErrors(parsed.errors);
+      showToast('error', parsed.message);
     } finally {
       setSubmitting(false);
     }

@@ -10,6 +10,7 @@ import useBookingList from '../hooks/useBookingList';
 import { BOOKING_STATUSES, cancelBooking, formatDate } from '../services/bookingService';
 import { parseApiError } from '../services/errors';
 import { formatPrice } from '../services/packageService';
+import { showToast } from '../services/toasts';
 
 export default function MyBookings() {
   const location = useLocation();
@@ -30,10 +31,13 @@ export default function MyBookings() {
       await cancelBooking(toCancel.id);
       setToCancel(null);
       setSuccess('Booking cancelled.');
+      showToast('success', 'Booking cancelled.');
       list.reload();
     } catch (requestError) {
       setToCancel(null);
-      setError(parseApiError(requestError).message);
+      const message = parseApiError(requestError).message;
+      setError(message);
+      showToast('error', message);
     } finally {
       setCancelling(false);
     }
@@ -97,7 +101,12 @@ export default function MyBookings() {
         columns={columns}
         data={list.items}
         loading={list.loading}
-        emptyMessage="You have no bookings yet. Browse packages to book your first trip."
+        emptyMessage={(
+          <div className="empty-state">
+            <p>You have no bookings for this status. Browse packages to book your first trip.</p>
+            <Button variant="secondary" onClick={() => list.setStatus('')}>Clear filters</Button>
+          </div>
+        )}
       />
       <Pagination
         page={list.page}

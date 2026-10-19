@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Alert from '../components/Alert';
 import StatusBadge from '../components/StatusBadge';
+import Spinner from '../components/Spinner';
 import { parseApiError } from '../services/errors';
 import { fetchPackage, formatPrice } from '../services/packageService';
 
@@ -42,7 +43,7 @@ export default function PackageDetails() {
   return (
     <div className="container">
       <Link to="/packages">← Back to packages</Link>
-      {loading && <p className="state-msg">Loading...</p>}
+      {loading && <Spinner label="Loading package..." />}
       <Alert type="error">{error}</Alert>
 
       {travelPackage && (

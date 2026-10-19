@@ -9,6 +9,7 @@ import useBookingList from '../../hooks/useBookingList';
 import { BOOKING_STATUSES, formatDate, updateBookingStatus } from '../../services/bookingService';
 import { formatPrice } from '../../services/packageService';
 import { parseApiError } from '../../services/errors';
+import { showToast } from '../../services/toasts';
 
 const ACTIONS = {
   Pending: [
@@ -36,13 +37,17 @@ export default function AdminBookings() {
 
     try {
       await updateBookingStatus(pending.booking.id, pending.to);
-      setSuccess(`Booking #${pending.booking.id} is now ${pending.to}.`);
+      const message = `Booking #${pending.booking.id} is now ${pending.to}.`;
+      setSuccess(message);
+      showToast('success', message);
       setPending(null);
       setViewing(null);
       list.reload();
     } catch (requestError) {
       setPending(null);
-      setError(parseApiError(requestError).message);
+      const message = parseApiError(requestError).message;
+      setError(message);
+      showToast('error', message);
     } finally {
       setSaving(false);
     }
@@ -112,7 +117,17 @@ export default function AdminBookings() {
       <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>
       <Alert type="error" onClose={() => setError('')}>{error || list.error}</Alert>
 
-      <DataTable columns={columns} data={list.items} loading={list.loading} emptyMessage="No bookings found." />
+      <DataTable
+        columns={columns}
+        data={list.items}
+        loading={list.loading}
+        emptyMessage={(
+          <div className="empty-state">
+            <p>No bookings found for this status.</p>
+            <Button variant="secondary" onClick={() => list.setStatus('')}>Clear filters</Button>
+          </div>
+        )}
+      />
       <Pagination
         page={list.page}
         lastPage={list.lastPage}

@@ -15,6 +15,7 @@ import {
   updatePackage,
 } from '../../services/packageService';
 import { parseApiError } from '../../services/errors';
+import { showToast } from '../../services/toasts';
 
 export default function AdminPackages() {
   const list = usePackageList(10);
@@ -61,12 +62,15 @@ export default function AdminPackages() {
         await createPackage(values);
       }
       setFormOpen(false);
-      setSuccess(editing ? 'Package updated successfully.' : 'Package created successfully.');
+      const message = editing ? 'Package updated successfully.' : 'Package created successfully.';
+      setSuccess(message);
+      showToast('success', message);
       list.reload();
     } catch (error) {
       const parsed = parseApiError(error);
       setFormMessage(parsed.message);
       setServerErrors(parsed.errors);
+      showToast('error', parsed.message);
     } finally {
       setSaving(false);
     }
@@ -85,6 +89,7 @@ export default function AdminPackages() {
       await deletePackage(toDelete.id);
       setToDelete(null);
       setSuccess('Package deleted successfully.');
+      showToast('success', 'Package deleted successfully.');
       if (list.items.length === 1 && list.page > 1) {
         list.setPage(list.page - 1);
       } else {
@@ -92,7 +97,9 @@ export default function AdminPackages() {
       }
     } catch (error) {
       setToDelete(null);
-      setPageError(parseApiError(error).message);
+      const message = parseApiError(error).message;
+      setPageError(message);
+      showToast('error', message);
     } finally {
       setDeleting(false);
     }
@@ -151,7 +158,12 @@ export default function AdminPackages() {
         columns={columns}
         data={list.items}
         loading={list.loading}
-        emptyMessage="No packages found. Create one or change your search."
+        emptyMessage={(
+          <div className="empty-state">
+            <p>No packages found. Create one or change your search.</p>
+            <Button variant="secondary" onClick={list.clearFilters}>Clear filters</Button>
+          </div>
+        )}
       />
       <Pagination
         page={list.page}
