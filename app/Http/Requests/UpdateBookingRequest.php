@@ -31,8 +31,9 @@ class UpdateBookingRequest extends FormRequest
                 'exists:users,id',
             ],
             'travel_package_id' => ['sometimes', 'required', 'integer', 'exists:travel_packages,id'],
-            'booking_date' => ['sometimes', 'required', 'date'],
-            'number_of_guests' => ['sometimes', 'required', 'integer', 'min:1'],
+            'booking_date' => ['sometimes', 'required', 'date', 'after_or_equal:today'],
+            'number_of_guests' => ['sometimes', 'required', 'integer', 'min:1', 'max:50'],
+            'special_request' => ['sometimes', 'nullable', 'string', 'max:500'],
         ];
     }
 }

@@ -40,7 +40,7 @@ class BookingController extends Controller
 
         return BookingResource::collection(
             $query->orderBy('booking_date')->orderBy('id')
-                ->paginate($filters['per_page'] ?? 15)
+                ->paginate($filters['per_page'] ?? 10)
                 ->withQueryString(),
         );
     }
@@ -65,6 +65,7 @@ class BookingController extends Controller
                 'travel_package_id' => $travelPackage->getKey(),
                 'booking_date' => $attributes['booking_date'],
                 'number_of_guests' => $numberOfGuests,
+                'special_request' => $attributes['special_request'] ?? null,
                 'total_amount' => $this->calculateTotalAmount($travelPackage, $numberOfGuests),
                 'status' => 'Pending',
             ]);
@@ -85,6 +86,36 @@ class BookingController extends Controller
             ->findOrFail($booking->getKey());
 
         return new BookingResource($visibleBooking);
+    }
+
+    public function cancel(Request $request, Booking $booking): BookingResource
+    {
+        $user = $this->authenticatedUser($request);
+
+        $cancelledBooking = DB::transaction(function () use ($booking, $user): Booking {
+            $booking = Booking::query()->lockForUpdate()->findOrFail($booking->getKey());
+
+            abort_unless($booking->user_id === $user->getKey(), 403);
+
+            if ($booking->status !== 'Pending') {
+                throw ValidationException::withMessages([
+                    'status' => 'Only pending bookings can be cancelled.',
+                ]);
+            }
+
+            $travelPackage = TravelPackage::query()
+                ->whereKey($booking->travel_package_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $travelPackage->increment('availability', $booking->number_of_guests);
+            $booking->status = 'Cancelled';
+            $booking->save();
+
+            return $booking->refresh()->load(['user', 'travelPackage', 'payment']);
+        });
+
+        return new BookingResource($cancelledBooking);
     }
 
     public function update(UpdateBookingRequest $request, Booking $booking): BookingResource

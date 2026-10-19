@@ -26,7 +26,7 @@ class IndexBookingRequest extends FormRequest
             'status' => ['sometimes', 'string', 'in:Pending,Confirmed,Completed,Cancelled'],
             'date_from' => ['sometimes', 'date'],
             'date_to' => ['sometimes', 'date', 'after_or_equal:date_from'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:50'],
         ];
     }
 }

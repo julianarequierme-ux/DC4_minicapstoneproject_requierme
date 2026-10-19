@@ -39,6 +39,7 @@ class BookingControllerTest extends TestCase
             'travel_package_id' => $package->id,
             'booking_date' => '2026-12-10',
             'number_of_guests' => 3,
+            'special_request' => 'Window seat, if available.',
             'total_amount' => '0.01',
             'status' => 'Confirmed',
         ])->assertCreated()
@@ -46,6 +47,7 @@ class BookingControllerTest extends TestCase
             ->assertJsonPath('data.travel_package_id', $package->id)
             ->assertJsonPath('data.total_amount', '3751.50')
             ->assertJsonPath('data.status', 'Pending')
+            ->assertJsonPath('data.special_request', 'Window seat, if available.')
             ->assertJsonPath('data.travel_package.id', $package->id);
 
         $this->assertDatabaseHas('bookings', [
@@ -53,6 +55,7 @@ class BookingControllerTest extends TestCase
             'travel_package_id' => $package->id,
             'total_amount' => '3751.50',
             'status' => 'Pending',
+            'special_request' => 'Window seat, if available.',
         ]);
         $this->assertDatabaseHas('travel_packages', [
             'id' => $package->id,
@@ -86,6 +89,21 @@ class BookingControllerTest extends TestCase
 
         $this->assertSame(0, Booking::query()->count());
         $this->assertSame(1, $limitedPackage->fresh()->availability);
+    }
+
+    public function test_booking_creation_validates_date_guest_limit_and_special_request_length(): void
+    {
+        $customer = User::factory()->create();
+        $package = TravelPackage::factory()->create(['availability' => 60]);
+        $this->authenticateAs($customer);
+
+        $this->postJson('/api/bookings', [
+            'travel_package_id' => $package->id,
+            'booking_date' => '2026-10-18',
+            'number_of_guests' => 51,
+            'special_request' => str_repeat('a', 501),
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['booking_date', 'number_of_guests', 'special_request']);
     }
 
     public function test_customers_only_list_filter_and_show_their_own_bookings(): void
@@ -141,6 +159,7 @@ class BookingControllerTest extends TestCase
         $this->patchJson("/api/bookings/{$booking->id}", [
             'travel_package_id' => $newPackage->id,
             'number_of_guests' => 3,
+            'special_request' => 'Vegetarian meal.',
             'total_amount' => '1.00',
             'status' => 'Confirmed',
         ])->assertOk()
@@ -148,6 +167,7 @@ class BookingControllerTest extends TestCase
             ->assertJsonPath('data.number_of_guests', 3)
             ->assertJsonPath('data.total_amount', '6000.00')
             ->assertJsonPath('data.status', 'Pending')
+            ->assertJsonPath('data.special_request', 'Vegetarian meal.')
             ->assertJsonPath('data.user_id', $customer->id);
 
         $this->assertDatabaseHas('travel_packages', [
@@ -168,6 +188,11 @@ class BookingControllerTest extends TestCase
             'id' => $booking->id,
             'user_id' => $customer->id,
         ]);
+
+        $this->patchJson("/api/bookings/{$booking->id}", [
+            'booking_date' => '2026-10-18',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['booking_date']);
     }
 
     public function test_customer_cannot_update_another_customers_booking(): void
@@ -194,9 +219,8 @@ class BookingControllerTest extends TestCase
         $package->decrement('availability', 2);
         $this->authenticateAs($customer);
 
-        $this->patchJson("/api/bookings/{$booking->id}/status", [
-            'status' => 'Cancelled',
-        ])->assertOk()
+        $this->patchJson("/api/bookings/{$booking->id}/cancel")
+            ->assertOk()
             ->assertJsonPath('data.status', 'Cancelled');
 
         $this->assertDatabaseHas('travel_packages', [
@@ -252,9 +276,12 @@ class BookingControllerTest extends TestCase
             'status' => 'Confirmed',
         ])->assertForbidden();
 
-        $this->patchJson("/api/bookings/{$otherBooking->id}/status", [
+        $this->patchJson("/api/bookings/{$otherBooking->id}/cancel")
+            ->assertForbidden();
+
+        $this->patchJson("/api/bookings/{$ownedBooking->id}/status", [
             'status' => 'Cancelled',
-        ])->assertNotFound();
+        ])->assertForbidden();
     }
 
     public function test_admin_can_see_all_bookings_and_delete_booking_with_payment(): void
@@ -297,6 +324,7 @@ class BookingControllerTest extends TestCase
         $this->patchJson("/api/bookings/{$booking->id}", [])->assertUnauthorized();
         $this->deleteJson("/api/bookings/{$booking->id}")->assertUnauthorized();
         $this->patchJson("/api/bookings/{$booking->id}/status", [])->assertUnauthorized();
+        $this->patchJson("/api/bookings/{$booking->id}/cancel")->assertUnauthorized();
 
         $customer = User::factory()->create();
         $this->authenticateAs($customer);

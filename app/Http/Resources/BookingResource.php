@@ -26,6 +26,7 @@ class BookingResource extends JsonResource
             'travel_package_id' => $this->travel_package_id,
             'booking_date' => $this->booking_date?->toDateString(),
             'number_of_guests' => $this->number_of_guests,
+            'special_request' => $this->special_request,
             'total_amount' => $this->total_amount,
             'status' => $this->status,
             'travel_package' => new TravelPackageResource($this->whenLoaded('travelPackage')),

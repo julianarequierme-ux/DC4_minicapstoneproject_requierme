@@ -31,8 +31,9 @@ class StoreBookingRequest extends FormRequest
                 'exists:users,id',
             ],
             'travel_package_id' => ['required', 'integer', 'exists:travel_packages,id'],
-            'booking_date' => ['required', 'date'],
-            'number_of_guests' => ['required', 'integer', 'min:1'],
+            'booking_date' => ['required', 'date', 'after_or_equal:today'],
+            'number_of_guests' => ['required', 'integer', 'min:1', 'max:50'],
+            'special_request' => ['nullable', 'string', 'max:500'],
         ];
     }
 }
