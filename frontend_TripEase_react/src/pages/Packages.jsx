@@ -15,8 +15,11 @@ export default function Packages() {
       <PackageFilters
         search={packageList.search}
         onSearch={packageList.setSearch}
+        category={packageList.category}
+        onCategory={packageList.setCategory}
         status={packageList.status}
         onStatus={packageList.setStatus}
+        onClear={packageList.clearFilters}
       />
 
       <Alert type="error">{packageList.error}</Alert>
@@ -46,11 +49,11 @@ export default function Packages() {
       <Pagination
         page={packageList.page}
         lastPage={packageList.lastPage}
+        from={packageList.from}
+        to={packageList.to}
+        total={packageList.total}
         onChange={packageList.setPage}
       />
-      {!packageList.loading && packageList.total > 0 && (
-        <p className="state-msg">{packageList.total} package(s) total</p>
-      )}
     </div>
   );
 }

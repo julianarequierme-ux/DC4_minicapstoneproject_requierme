@@ -102,7 +102,9 @@ export default function AdminBookings() {
         <select value={list.status} onChange={(event) => list.setStatus(event.target.value)}>
           <option value="">All statuses</option>
           {BOOKING_STATUSES.map((status) => (
-            <option key={status} value={status}>{status}</option>
+            <option key={status} value={status}>
+              {status === 'Confirmed' ? 'Approved' : status}
+            </option>
           ))}
         </select>
       </div>
@@ -111,7 +113,14 @@ export default function AdminBookings() {
       <Alert type="error" onClose={() => setError('')}>{error || list.error}</Alert>
 
       <DataTable columns={columns} data={list.items} loading={list.loading} emptyMessage="No bookings found." />
-      <Pagination page={list.page} lastPage={list.lastPage} onChange={list.setPage} />
+      <Pagination
+        page={list.page}
+        lastPage={list.lastPage}
+        from={list.from}
+        to={list.to}
+        total={list.total}
+        onChange={list.setPage}
+      />
 
       <Modal
         isOpen={Boolean(viewing)}

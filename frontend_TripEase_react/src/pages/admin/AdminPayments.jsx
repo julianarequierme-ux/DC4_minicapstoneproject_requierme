@@ -206,7 +206,14 @@ export default function AdminPayments() {
         loading={loading}
         emptyMessage="No payments recorded yet."
       />
-      <Pagination page={page} lastPage={lastPage} onChange={setPage} />
+      <Pagination
+        page={page}
+        lastPage={lastPage}
+        from={hasCurrentPayments ? paymentResult.data.from : null}
+        to={hasCurrentPayments ? paymentResult.data.to : null}
+        total={hasCurrentPayments ? paymentResult.data.total : 0}
+        onChange={setPage}
+      />
 
       <Modal
         isOpen={modalOpen}

@@ -22,7 +22,7 @@ export default function useBookingList(perPage = 10) {
         if (active) {
           setResult({
             requestKey,
-            data: { items: [], lastPage: 1, total: 0 },
+            data: { items: [], lastPage: 1, from: null, to: null, total: 0 },
             error: parseApiError(requestError).message,
           });
         }

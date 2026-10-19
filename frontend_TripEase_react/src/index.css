@@ -297,6 +297,22 @@ body {
   color: #b42318;
 }
 
+.badge-pending {
+  background: #fff4d6;
+  color: #8a5b00;
+}
+
+.badge-approved,
+.badge-completed {
+  background: #e7f6ec;
+  color: #17653a;
+}
+
+.badge-cancelled {
+  background: #fdeaea;
+  color: #b42318;
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
@@ -375,9 +391,22 @@ body {
 
 .pagination {
   display: flex;
-  gap: 6px;
-  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.pagination-summary {
+  margin: 0;
+  color: #64748b;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
   flex-wrap: wrap;
 }
 

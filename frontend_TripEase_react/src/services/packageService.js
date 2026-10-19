@@ -1,6 +1,14 @@
 import api from './api';
 
 export const STATUS_OPTIONS = ['active', 'inactive'];
+export const CATEGORY_OPTIONS = [
+  'Adventure',
+  'Beach',
+  'Cultural',
+  'Family',
+  'Nature',
+  'Relaxation',
+];
 
 export function normalizePage(response) {
   let body = response.data;
@@ -15,6 +23,8 @@ export function normalizePage(response) {
     items,
     page: meta.current_page ?? 1,
     lastPage: meta.last_page ?? 1,
+    from: meta.from ?? null,
+    to: meta.to ?? null,
     total: meta.total ?? items.length,
   };
 }

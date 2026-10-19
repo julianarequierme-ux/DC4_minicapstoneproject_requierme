@@ -83,7 +83,9 @@ export default function MyBookings() {
         <select value={list.status} onChange={(event) => list.setStatus(event.target.value)}>
           <option value="">All statuses</option>
           {BOOKING_STATUSES.map((status) => (
-            <option key={status} value={status}>{status}</option>
+            <option key={status} value={status}>
+              {status === 'Confirmed' ? 'Approved' : status}
+            </option>
           ))}
         </select>
       </div>
@@ -97,7 +99,14 @@ export default function MyBookings() {
         loading={list.loading}
         emptyMessage="You have no bookings yet. Browse packages to book your first trip."
       />
-      <Pagination page={list.page} lastPage={list.lastPage} onChange={list.setPage} />
+      <Pagination
+        page={list.page}
+        lastPage={list.lastPage}
+        from={list.from}
+        to={list.to}
+        total={list.total}
+        onChange={list.setPage}
+      />
 
       <Modal
         isOpen={Boolean(toCancel)}

@@ -140,8 +140,11 @@ export default function AdminPackages() {
       <PackageFilters
         search={list.search}
         onSearch={list.setSearch}
+        category={list.category}
+        onCategory={list.setCategory}
         status={list.status}
         onStatus={list.setStatus}
+        onClear={list.clearFilters}
       />
 
       <DataTable
@@ -150,10 +153,14 @@ export default function AdminPackages() {
         loading={list.loading}
         emptyMessage="No packages found. Create one or change your search."
       />
-      <Pagination page={list.page} lastPage={list.lastPage} onChange={list.setPage} />
-      {!list.loading && list.total > 0 && (
-        <p className="state-msg">{list.total} package(s) total</p>
-      )}
+      <Pagination
+        page={list.page}
+        lastPage={list.lastPage}
+        from={list.from}
+        to={list.to}
+        total={list.total}
+        onChange={list.setPage}
+      />
 
       <Modal
         isOpen={formOpen}
