@@ -26,6 +26,13 @@ body {
   gap: 8px;
 }
 
+.nav-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .navbar a {
   color: #fff;
   text-decoration: none;
@@ -41,6 +48,41 @@ body {
 .nav-user {
   margin-left: 16px;
   opacity: 0.85;
+}
+
+.nav-logout {
+  margin-left: 16px;
+  background: transparent;
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.auth-card {
+  max-width: 420px;
+  margin: 32px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+}
+
+.alert {
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.alert-error {
+  background: #fdeaea;
+  color: #b42318;
+}
+
+.alert-success {
+  background: #e7f6ec;
+  color: #17653a;
 }
 
 .btn {
