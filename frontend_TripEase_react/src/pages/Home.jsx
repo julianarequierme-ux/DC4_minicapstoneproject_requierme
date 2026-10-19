@@ -13,7 +13,7 @@ export default function Home() {
           {isAuthenticated ? (
             <Link
               className="btn btn-light"
-              to={isAdmin ? '/admin/dashboard' : '/packages'}
+              to={isAdmin ? '/dashboard' : '/packages'}
             >
               {isAdmin ? 'Go to admin dashboard' : 'Browse packages'}
             </Link>

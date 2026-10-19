@@ -26,7 +26,7 @@ export default function AppRoutes() {
       <Route path="/register" element={<Register />} />
 
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/my-dashboard" element={<Dashboard />} />
         <Route path="/packages" element={<Packages />} />
         <Route path="/packages/:id" element={<PackageDetails />} />
         <Route path="/packages/:id/book" element={<BookPackage />} />
@@ -36,6 +36,7 @@ export default function AppRoutes() {
       </Route>
 
       <Route element={<AdminRoute />}>
+        <Route path="/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/packages" element={<AdminPackages />} />
         <Route path="/admin/bookings" element={<AdminBookings />} />

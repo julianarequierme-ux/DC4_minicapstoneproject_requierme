@@ -16,7 +16,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && isAuthenticated) {
-    return <Navigate to={isAdmin ? '/admin/dashboard' : '/dashboard'} replace />;
+    return <Navigate to={isAdmin ? '/dashboard' : '/my-dashboard'} replace />;
   }
 
   const handleChange = (event) => {
@@ -44,7 +44,7 @@ export default function Login() {
       const user = await login(form);
       const isAdminUser = user?.role?.toLowerCase() === 'admin';
       const from = location.state?.from?.pathname;
-      navigate(from || (isAdminUser ? '/admin/dashboard' : '/dashboard'), {
+      navigate(from || (isAdminUser ? '/dashboard' : '/my-dashboard'), {
         replace: true,
       });
     } catch (error) {

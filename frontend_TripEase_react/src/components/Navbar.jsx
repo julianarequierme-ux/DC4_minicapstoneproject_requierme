@@ -40,7 +40,7 @@ export default function Navbar() {
         <Link to="/" onClick={close}>Home</Link>
         {isAuthenticated && !isAdmin && (
           <>
-            <Link to="/dashboard" onClick={close}>Dashboard</Link>
+            <Link to="/my-dashboard" onClick={close}>Dashboard</Link>
             <Link to="/packages" onClick={close}>Packages</Link>
             <Link to="/my-bookings" onClick={close}>My Bookings</Link>
             <Link to="/profile" onClick={close}>Profile</Link>
@@ -48,7 +48,7 @@ export default function Navbar() {
         )}
         {isAdmin && (
           <>
-            <Link to="/admin/dashboard" onClick={close}>Dashboard</Link>
+            <Link to="/dashboard" onClick={close}>Dashboard</Link>
             <Link to="/admin/packages" onClick={close}>Packages</Link>
             <Link to="/admin/bookings" onClick={close}>Bookings</Link>
             <Link to="/admin/payments" onClick={close}>Payments</Link>

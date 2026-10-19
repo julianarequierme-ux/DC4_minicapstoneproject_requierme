@@ -12,7 +12,7 @@ export default function AdminRoute() {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   if (!isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/my-dashboard" replace />;
   }
   return <Outlet />;
 }
